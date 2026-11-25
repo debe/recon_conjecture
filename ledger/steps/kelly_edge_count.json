@@ -1,0 +1,55 @@
+{
+  "id": "kelly_edge_count",
+  "program": "kelly",
+  "title": "Hypomorphic graphs have the same number of edges",
+  "statement_en": "For every n at least 3 and all graphs G, H on Fin n: if G and H are hypomorphic (have the same deck), then G and H have the same number of edges.",
+  "statement_lean": "∀ n : ℕ, 3 ≤ n → ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → G.edgeSet.ncard = H.edgeSet.ncard",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_kelly_edge_count.lean",
+  "statement_sha256": "6a50efce048d52f4eb8729c2225dfa22ed8a606270ba3ceef60523eb10cdb239",
+  "status": "checked",
+  "author": "librarian",
+  "created": "2026-11-25T12:27:51+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_edge_count (lens: back-translation)\n\nReviewer: fid-backtranslate. Verdict: **pass**.\n\n## 1. My reading of the Lean, written before I read statement_en\n\nLean body:\n`∀ n : ℕ, 3 ≤ n → ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → G.edgeSet.ncard = H.edgeSet.ncard`\n\nExpanding `Recon.Hypomorphic` and `Recon.card` from `lean/Recon/Basic.lean`:\n\n> For every natural number n with n ≥ 3, and for all simple graphs G and H on the vertex\n> set {0, …, n−1}: suppose there is a bijection σ of the vertex set such that, for every\n> vertex x, the subgraph of G induced on V ∖ {x} is isomorphic (as a graph) to the subgraph\n> of H induced on V ∖ {σ x}. Then the number of edges of G equals the number of edges of H,\n> where \"number of edges\" is the cardinality (`Set.ncard`) of the set of unordered pairs\n> `Sym2 (Fin n)` that are adjacent.\n\n## 2. Clause-by-clause comparison with statement_en\n\nstatement_en: \"For every n at least 3 and all graphs G, H on Fin n: if G and H are\nhypomorphic (have the same deck), then G and H have the same number of edges.\"\n\n| English clause | Lean | Match |\n|---|---|---|\n| for every n at least 3 | `∀ n : ℕ, 3 ≤ n →` | yes; `≤`, not `<`, so n = 3 is included |\n| all graphs G, H on Fin n | `∀ G H : SimpleGraph (Fin n)` | yes; simple undirected loopless graphs on the same vertex type |\n| G and H are hypomorphic (same deck) | `Recon.Hypomorphic G H` | yes; a bijection matching each card G − x to an isomorphic card H − σx is exactly equality of the decks as multisets of isomorphism classes (Bondy–Hemminger) |\n| same number of edges | `G.edgeSet.ncard = H.edgeSet.ncard` | yes, see the coercion check below |\n\nQuantifier order: n comes first, then G and H; the hypothesis is the only premise. There are\nno extra or missing hypotheses.\n\n## 3. Failure-mode checklist\n\n- **Quantifier order or scope:** correct.\n- **Hypothesis n ≥ 3:** present. It is needed: at n = 2, K₂ and 2K₁ are hypomorphic\n  (`anchor_two_vertices_hypomorphic`) but have 1 and 0 edges. Without the bound the\n  statement would be false. The bound matches the edge-count formula\n  |E| = Σ|E(G − v)| / (n − 2).\n- **Fin n against arbitrary types:** both graphs are on `Fin n`. This matches the English\n  and the repo convention.\n- **ncard and coercion:** `G.edgeSet : Set (Sym2 (Fin n))` is finite because `Fin n` is\n  finite, so `Set.ncard` is the true edge count. The infinite-set-has-ncard-0 trap does not\n  apply. It agrees with `G.edgeFinset.card`. Both sides are ℕ; no coercion changes meaning.\n- **Vacuity or triviality:** not vacuous, because Hypomorphic is reflexive (anchor), so\n  the premise can hold. It is also not trivial, because non-isomorphic graphs can have\n  hypomorphic-looking pairs only when the deck carries the information; at n = 2 the\n  conclusion fails. The statement is a genuine (and known true, Kelly) recognizability\n  fact.\n- **Notion of isomorphism, card or deck:** `card` is the induced subgraph on `{x}ᶜ`, which\n  is the standard vertex-deleted subgraph. `≃g` is graph isomorphism. `Nonempty` is the\n  right wrapper for \"is isomorphic to\".\n- **Nonempty against explicit structure:** the conclusion is a Prop equality; there is no\n  issue.\n\n## 4. Elaboration\n\n`lake env lean Recon/Statements/S_kelly_edge_count.lean` elaborates without errors.\n\n## 5. Remark (not a fidelity issue)\n\nThe statement is equivalent to `Recon.Recognizable (fun n G => G.edgeSet.ncard = k)` for\nall k, phrased directly. It is a faithful formalization of \"the size is recognizable from\nthe deck for n ≥ 3\".\n",
+      "sha256": "6a50efce048d52f4eb8729c2225dfa22ed8a606270ba3ceef60523eb10cdb239",
+      "at": "2026-11-25T12:28:46+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_edge_count (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\n- English: For every n at least 3 and all graphs G, H on Fin n: if G and H are hypomorphic\n  (have the same deck), then G and H have the same number of edges.\n- Lean: `∀ n : ℕ, 3 ≤ n → ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → G.edgeSet.ncard = H.edgeSet.ncard`\n- `Recon.Hypomorphic G H := ∃ σ : V ≃ W, ∀ x, Nonempty (card G x ≃g card H (σ x))`, with\n  `card G x = G.induce {x}ᶜ` (from the trusted Basic definitions file).\n\n## Predicates encoded\nScript: `notes/sketches/kelly_edge_count/fidelity_fid-testing_script.py` (uses\n`tools/search/small_graphs.py` as a library).\n- Lean reading: `hyp_lean` searches for the bijection σ directly, as a perfect matching in the\n  bipartite graph \"card G-x is isomorphic to card H-y\" (networkx `is_isomorphic` on induced\n  subgraphs). It does not use `small_graphs.canon`, so it is independent of the English side.\n  `lean_pred(n,G,H) = not(3<=n) or not hyp_lean or |E(G)| = |E(H)|`.\n- English reading: `hyp_en` is equality of the multiset of card isomorphism classes\n  (`deck_key`). `en_pred(n,G,H) = not(n>=3) or not hyp_en or |E(G)| = |E(H)|`.\n- H was randomly relabelled for each pair, so labelled graphs are exercised, not only atlas\n  representatives.\n\n## Results (all ordered pairs of graphs, n = 0..6)\n| n | graphs | pairs | hypomorphic pairs | non-iso hypomorphic | hyp mismatch | pred differ |\n|---|---|---|---|---|---|---|\n| 0 | 1 | 1 | 1 | 0 | 0 | 0 |\n| 1 | 1 | 1 | 1 | 0 | 0 | 0 |\n| 2 | 2 | 4 | 4 | 2 | 0 | 0 |\n| 3 | 4 | 16 | 4 | 0 | 0 | 0 |\n| 4 | 11 | 121 | 11 | 0 | 0 | 0 |\n| 5 | 34 | 1156 | 34 | 0 | 0 | 0 |\n| 6 | 156 | 24336 | 156 | 0 | 0 | 0 |\n\nThere are no pairs where the two readings of hypomorphism differ, and no pairs where the two\npredicates differ. Neither predicate is ever false.\n\n## Failure-mode checks\n- **Vacuity:** the hypothesis holds. `Hypomorphic G G` always holds (anchor\n  `anchor_hypomorphic_refl`), and it held for 205 pairs with n in 3..6.\n- **The `3 ≤ n` guard is load-bearing:** at n = 2, K2 and 2K1 satisfy `hyp_lean` (as in the\n  anchor `anchor_two_vertices_hypomorphic`) but have 1 and 0 edges. Without the guard the\n  statement would be false, and the English says \"n at least 3\". It is not an extra\n  hypothesis.\n- **Off-by-one:** `3 ≤ n` matches \"at least 3\".\n- **Edge count:** `G.edgeSet.ncard` is a subset of `Sym2 (Fin n)`, which is finite, so `ncard`\n  is the true edge count. The infinite-set-gives-0 pitfall does not apply. It agrees with\n  networkx `number_of_edges`.\n- **Types and quantifiers:** both graphs are on the same `Fin n`, and n is universally\n  quantified outside. This matches the English. `Nonempty (≃g)` is the right notion\n  (existence of an isomorphism), and the deck is the standard Bondy–Hemminger bijection form.\n- **Trivially true?** No. It does not follow from the definitions without the counting\n  argument |E| = Σ|E(G−v)|/(n−2), so it is a genuine (Kelly-style) statement.\n\n## Limitation of the test\nFor 3 ≤ n ≤ 6, every hypomorphic pair is isomorphic (reconstruction holds there; McKay). So\nthe edge-count conclusion cannot be distinguished from other isomorphism-invariant\nconclusions on this range. The test does confirm that the hypothesis readings coincide\nexactly, that the guard matches, and that the statement is not vacuous. The back-translation\nlens covers the rest.\n",
+      "sha256": "6a50efce048d52f4eb8729c2225dfa22ed8a606270ba3ceef60523eb10cdb239",
+      "at": "2026-11-25T12:33:47+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "kelly_edge_count_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_kelly_edge_count.lean",
+    "sha256": "3feafa0df6421ac6abb99b5976df6b58c561bcd0682408318795d9da9abd5129",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T12:44:00+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "6a50efce048d52f4eb8729c2225dfa22ed8a606270ba3ceef60523eb10cdb239",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T12:42:05+00:00"
+}

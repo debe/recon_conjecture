@@ -11,3 +11,45 @@
 {"ts": "2026-11-25T10:54:37+00:00", "kind": "verdict", "step": "found_001", "actor": "debe/b1", "target": "found_001", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_001.lean"}
 {"ts": "2026-11-25T10:54:37+00:00", "kind": "checked", "step": "found_001", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_001.lean"}
 {"ts": "2026-11-25T12:01:56+00:00", "kind": "renamed", "step": "found_iso_hypomorphic", "actor": "debe/desk", "renamed_from": "found_001"}
+{"ts": "2026-11-25T12:27:01+00:00", "kind": "proposed", "step": "found_hypomorphic_symm", "actor": "debe/librarian", "title": "Hypomorphic is symmetric"}
+{"ts": "2026-11-25T12:27:09+00:00", "kind": "proposed", "step": "found_hypomorphic_trans", "actor": "debe/librarian", "title": "Hypomorphic is transitive"}
+{"ts": "2026-11-25T12:27:16+00:00", "kind": "proposed", "step": "found_hypomorphic_iso_invariant", "actor": "debe/librarian", "title": "Hypomorphism is invariant under isomorphism on either side"}
+{"ts": "2026-11-25T12:27:30+00:00", "kind": "proposed", "step": "kelly_card_edges_add_degree", "actor": "debe/librarian", "title": "A card has |E| minus deg v edges"}
+{"ts": "2026-11-25T12:27:44+00:00", "kind": "proposed", "step": "kelly_edge_sum", "actor": "debe/librarian", "title": "The card edge counts sum to (n - 2)|E|"}
+{"ts": "2026-11-25T12:27:51+00:00", "kind": "proposed", "step": "kelly_edge_count", "actor": "debe/librarian", "title": "Hypomorphic graphs have the same number of edges"}
+{"ts": "2026-11-25T12:27:57+00:00", "kind": "fidelity", "step": "found_hypomorphic_symm", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T12:28:01+00:00", "kind": "fidelity", "step": "found_hypomorphic_trans", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T12:28:02+00:00", "kind": "fidelity", "step": "found_hypomorphic_iso_invariant", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T12:28:37+00:00", "kind": "fidelity", "step": "kelly_card_edges_add_degree", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T12:28:41+00:00", "kind": "fidelity", "step": "kelly_edge_sum", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T12:28:46+00:00", "kind": "fidelity", "step": "kelly_edge_count", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T12:29:28+00:00", "kind": "fidelity", "step": "kelly_card_edges_add_degree", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T12:29:36+00:00", "kind": "fidelity", "step": "kelly_edge_sum", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T12:31:45+00:00", "kind": "fidelity", "step": "found_hypomorphic_trans", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T12:31:46+00:00", "kind": "fidelity", "step": "found_hypomorphic_iso_invariant", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T12:33:47+00:00", "kind": "fidelity", "step": "kelly_edge_count", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T12:34:21+00:00", "kind": "fidelity", "step": "found_hypomorphic_symm", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T12:41:59+00:00", "kind": "approved", "step": "found_hypomorphic_symm", "actor": "debe/human"}
+{"ts": "2026-11-25T12:41:59+00:00", "kind": "approved", "step": "found_hypomorphic_trans", "actor": "debe/human"}
+{"ts": "2026-11-25T12:42:00+00:00", "kind": "approved", "step": "found_hypomorphic_iso_invariant", "actor": "debe/human"}
+{"ts": "2026-11-25T12:42:00+00:00", "kind": "approved", "step": "kelly_card_edges_add_degree", "actor": "debe/human"}
+{"ts": "2026-11-25T12:42:00+00:00", "kind": "approved", "step": "kelly_edge_sum", "actor": "debe/human"}
+{"ts": "2026-11-25T12:42:00+00:00", "kind": "approved", "step": "kelly_edge_count", "actor": "debe/human"}
+{"ts": "2026-11-25T12:42:04+00:00", "kind": "frozen", "step": "found_hypomorphic_symm", "actor": "debe/desk"}
+{"ts": "2026-11-25T12:42:04+00:00", "kind": "frozen", "step": "found_hypomorphic_trans", "actor": "debe/desk"}
+{"ts": "2026-11-25T12:42:04+00:00", "kind": "frozen", "step": "found_hypomorphic_iso_invariant", "actor": "debe/desk"}
+{"ts": "2026-11-25T12:42:05+00:00", "kind": "frozen", "step": "kelly_card_edges_add_degree", "actor": "debe/desk"}
+{"ts": "2026-11-25T12:42:05+00:00", "kind": "frozen", "step": "kelly_edge_sum", "actor": "debe/desk"}
+{"ts": "2026-11-25T12:42:05+00:00", "kind": "frozen", "step": "kelly_edge_count", "actor": "debe/desk"}
+{"ts": "2026-11-25T12:42:58+00:00", "kind": "verdict", "step": "found_hypomorphic_symm", "actor": "debe/b1", "target": "found_hypomorphic_symm", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_hypomorphic_symm.lean"}
+{"ts": "2026-11-25T12:42:58+00:00", "kind": "checked", "step": "found_hypomorphic_symm", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_hypomorphic_symm.lean"}
+{"ts": "2026-11-25T12:43:10+00:00", "kind": "verdict", "step": "found_hypomorphic_trans", "actor": "debe/b1", "target": "found_hypomorphic_trans", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_hypomorphic_trans.lean"}
+{"ts": "2026-11-25T12:43:10+00:00", "kind": "checked", "step": "found_hypomorphic_trans", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_hypomorphic_trans.lean"}
+{"ts": "2026-11-25T12:43:22+00:00", "kind": "verdict", "step": "found_hypomorphic_iso_invariant", "actor": "debe/b1", "target": "found_hypomorphic_iso_invariant", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_hypomorphic_iso_invariant.lean"}
+{"ts": "2026-11-25T12:43:22+00:00", "kind": "checked", "step": "found_hypomorphic_iso_invariant", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_hypomorphic_iso_invariant.lean"}
+{"ts": "2026-11-25T12:43:35+00:00", "kind": "verdict", "step": "kelly_card_edges_add_degree", "actor": "debe/b1", "target": "kelly_card_edges_add_degree", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_kelly_card_edges_add_degree.lean"}
+{"ts": "2026-11-25T12:43:35+00:00", "kind": "checked", "step": "kelly_card_edges_add_degree", "actor": "debe/b1", "file": "lean/Recon/Checked/L_kelly_card_edges_add_degree.lean"}
+{"ts": "2026-11-25T12:44:00+00:00", "kind": "verdict", "step": "kelly_edge_count", "actor": "debe/b1", "target": "kelly_edge_count", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_kelly_edge_count.lean"}
+{"ts": "2026-11-25T12:44:00+00:00", "kind": "checked", "step": "kelly_edge_count", "actor": "debe/b1", "file": "lean/Recon/Checked/L_kelly_edge_count.lean"}
+{"ts": "2026-11-25T12:44:19+00:00", "kind": "verdict", "step": "kelly_edge_sum", "actor": "debe/b1", "target": "kelly_edge_sum", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_kelly_edge_sum.lean"}
+{"ts": "2026-11-25T12:44:19+00:00", "kind": "checked", "step": "kelly_edge_sum", "actor": "debe/b1", "file": "lean/Recon/Checked/L_kelly_edge_sum.lean"}

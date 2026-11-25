@@ -1,0 +1,54 @@
+{
+  "id": "found_hypomorphic_trans",
+  "program": "found",
+  "title": "Hypomorphic is transitive",
+  "statement_en": "For every n and all graphs G, H, K on Fin n: if G and H are hypomorphic and H and K are hypomorphic, then G and K are hypomorphic.",
+  "statement_lean": "∀ (n : ℕ) (G H K : SimpleGraph (Fin n)), Recon.Hypomorphic G H → Recon.Hypomorphic H K → Recon.Hypomorphic G K",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_found_hypomorphic_trans.lean",
+  "statement_sha256": "d6f234216e281e65248377681ab0178f1486d1092e430e187be1b5aecbaa5cbe",
+  "status": "checked",
+  "author": "librarian",
+  "created": "2026-11-25T12:27:09+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_trans (lens: back-translation)\n\nReviewer: fid-backtranslate. Statement sha256 d6f23421...cbe.\n\n## 1. Independent reading of the Lean (written before reading statement_en)\n\nExpanding `Recon.Hypomorphic` and `Recon.card` from `lean/Recon/Basic.lean`:\n\nFor every natural number n and all simple graphs G, H, K on the vertex type `Fin n`:\nif there is a bijection σ : Fin n ≃ Fin n such that for every vertex x the induced subgraph\nof G on {x}ᶜ is isomorphic (`Nonempty (_ ≃g _)`) to the induced subgraph of H on {σ x}ᶜ,\nand there is a bijection τ : Fin n ≃ Fin n such that for every vertex y the induced subgraph\nof H on {y}ᶜ is isomorphic to the induced subgraph of K on {τ y}ᶜ,\nthen there is a bijection ρ : Fin n ≃ Fin n such that for every vertex x the induced subgraph\nof G on {x}ᶜ is isomorphic to the induced subgraph of K on {ρ x}ᶜ.\n\nIn words: having the same deck (as a card-matching bijection) is a transitive relation on\ngraphs on Fin n.\n\n## 2. Clause-by-clause comparison with statement_en\n\n| English clause | Lean | Match |\n|---|---|---|\n| \"For every n\" | `∀ (n : ℕ)` | yes |\n| \"all graphs G, H, K on Fin n\" | `∀ (G H K : SimpleGraph (Fin n))` | yes; one common vertex type, as stated |\n| \"G and H are hypomorphic\" | `Recon.Hypomorphic G H` (first hypothesis) | yes |\n| \"H and K are hypomorphic\" | `Recon.Hypomorphic H K` (second hypothesis) | yes, direction H to K as stated |\n| \"then G and K are hypomorphic\" | `Recon.Hypomorphic G K` | yes, direction G to K |\n\n## 3. Failure-mode checklist\n\n- Quantifier order/scope: all universal, outermost; σ and τ are existential inside each\n  hypothesis, the witness ρ in the conclusion is free to be chosen (σ followed by τ). Fine.\n- Missing/extra hypothesis: no `3 ≤ n`, and none is needed. Transitivity holds for every n\n  (including n = 0, 1, 2); the English also says \"for every n\". Adding n ≥ 3 would weaken it.\n- Fin n vs arbitrary types: Lean restricts to Fin n, exactly as the English says. This is\n  a specialisation of the general heterogeneous `Hypomorphic`, not a mismatch.\n- ≤ vs <, off-by-one: none present.\n- Vacuity: hypotheses are satisfiable (e.g. G = H = K, by `anchor_hypomorphic_refl`), and\n  the conclusion is non-trivial (it is not true for arbitrary G, K, by\n  `anchor_three_vertices_not_hypomorphic`). Not trivially true or vacuous.\n- Notion of isomorphism/card/deck: uses the trusted `card` (induced subgraph on {x}ᶜ) and\n  `≃g` (Mathlib graph isomorphism); deck equality is the standard Bondy–Hemminger\n  bijection form. Correct notion.\n- Nonempty vs structure: `Hypomorphic` is a Prop (∃ σ, ∀ x, Nonempty ...), and the\n  statement is a Prop; no data-vs-Prop confusion.\n- Coercions: the card vertex types `({x}ᶜ : Set (Fin n))` are subtypes; no numeric\n  coercions occur.\n\n## 4. Expected truth\n\nTrue: take ρ = σ.trans τ; for each x compose the isomorphisms\ncard G x ≃g card H (σ x) ≃g card K (τ (σ x)). This is a sanity note, not a result.\n\n## Verdict\n\nPASS. The Lean statement says exactly what the English says.\n",
+      "sha256": "d6f234216e281e65248377681ab0178f1486d1092e430e187be1b5aecbaa5cbe",
+      "at": "2026-11-25T12:28:01+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_trans (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\n\nLean (`S_found_hypomorphic_trans`, sha256 d6f23421...):\n`∀ (n : ℕ) (G H K : SimpleGraph (Fin n)), Recon.Hypomorphic G H → Recon.Hypomorphic H K → Recon.Hypomorphic G K`\n\nEnglish: for every n and all graphs G, H, K on Fin n, if G and H are hypomorphic and H and K\nare hypomorphic, then G and K are hypomorphic.\n\n`Recon.Hypomorphic G H := ∃ σ : V ≃ W, ∀ x, Nonempty (card G x ≃g card H (σ x))`, where\n`card G x = G.induce {x}ᶜ`.\n\n## Predicates encoded\n\n- **Lean reading** (`lean_hyp_perm`): literal search over every bijection σ, requiring each\n  induced subgraph `G[V∖{x}]` (original labels kept, as for the subtype) to be isomorphic\n  (networkx VF2) to `H[V∖{σx}]`. A matching-based variant (`lean_hyp_match`, a perfect\n  matching in the card-isomorphism bipartite relation, which is equivalent to ∃σ) is used\n  for the unlabelled sweep up to n = 6.\n- **English reading** (`en_hyp`): equal decks, meaning equal multisets of canonical forms\n  of the cards (`small_graphs.hypomorphic` / `deck_key`). This is independent of the Lean\n  encoding: it uses canon, not VF2.\n- Statement-level: for each relation, check every chain G~H, H~K for G~K.\n\nScript: `notes/sketches/found_hypomorphic_trans/fidelity_fid-testing_script.py` (run time\nabout 3 minutes).\n\n## Results\n\n| sweep | n | pair disagreements (Lean vs English) | hypothesis chains | transitivity failures |\n|---|---|---|---|---|\n| unlabelled (atlas) | 0..6 | 0 | 1,1,8,4,11,34,156 | 0 (both readings) |\n| all labelled graphs on Fin n | 0..4 | 0 | 1,1,8,56,5800 | 0 (both readings) |\n\nThe two predicates agree on every pair of graphs tested, and so do the two statement readings\non every triple.\n\n## Vacuity and triviality\n\n- The hypothesis is not vacuous. `Hypomorphic G G` always holds (anchor\n  `anchor_hypomorphic_refl`), so chains exist for every n. At n = 2 there are non-isomorphic\n  hypomorphic chains (K2 and 2K1, as in `anchor_two_vertices_hypomorphic`). For labelled graphs\n  on Fin 4 there are 556 hypomorphic ordered pairs, which gives 5800 chains.\n- The conclusion is not trivially true: `Hypomorphic` is false for many pairs (for example\n  `anchor_three_vertices_not_hypomorphic`), so a counterexample was possible in principle.\n- The statement itself is easy (compose σ's and the card isomorphisms). That matches the\n  English, which is a basic foundation fact, so it is not a fidelity defect.\n\n## Failure-mode checklist\n\n- Quantifier order and scope: n, G, H, K are all universal, and the hypotheses are a curried\n  implication. This matches the English.\n- Missing or extra hypothesis: there is no `3 ≤ n`, and none is needed or stated in the English\n  (\"for every n\"). Transitivity holds for n = 0, 1, 2 as well, and the tests confirm it.\n- `Fin n` against arbitrary types: the English says \"on Fin n\", so they match. All three graphs\n  share the vertex type, which is the intended reading.\n- Notion of deck: the ∃-bijection definition agrees with multiset-of-cards deck equality on\n  every tested pair.\n- Nonempty against structure, and coercions: `Nonempty (≃g)` per card is the intended\n  \"isomorphic\". No coercions are involved.\n\nThere is no mismatch.\n",
+      "sha256": "d6f234216e281e65248377681ab0178f1486d1092e430e187be1b5aecbaa5cbe",
+      "at": "2026-11-25T12:31:45+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "found_hypomorphic_trans_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_found_hypomorphic_trans.lean",
+    "sha256": "3d6d36177652e04625c49372d9d8be76f43ba534f3fea89959368d1765921421",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T12:43:10+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "d6f234216e281e65248377681ab0178f1486d1092e430e187be1b5aecbaa5cbe",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T12:42:04+00:00"
+}
