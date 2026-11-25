@@ -5,12 +5,16 @@ Blocks (exit 2, reason on stderr):
   * Edit / Write / NotebookEdit on a trusted path
   * Bash commands that mention a trusted path together with a write-like operation, or that
     redirect output into a trusted path
-  * Bash commands that run the human-only `desk.py approve`, set PR labels, merge PRs or
-    push to main (those are maintainer decisions)
+  * Bash commands that run the human-only `desk.py approve`, set PR labels or push to main
+    (those are maintainer decisions)
+
+Agents ship their own work through pull requests (tools/ship.py) and merge them once CI is
+green: branch protection on main requires the gate, and the `trusted-change` label that a
+change to the judge needs stays with the maintainers.
 
 The trusted zones change only through tools/desk.py and tools/gate.py, or by the human.
 This is a guard against accidents and shortcuts, not against a determined adversary:
-tools/audit.py and the human's git review are the final layers.
+CI (audit.py --clean and ci_policy.py) and branch protection are the final layers.
 """
 from __future__ import annotations
 
@@ -61,7 +65,6 @@ WRITE_HINTS = re.compile(
 MAINTAINER_ONLY = [
     (re.compile(r"\bgh\b[^\n;&|]*\b(label|labels|--add-label|--remove-label)\b"),
      "PR labels (trusted-change) are set by a maintainer"),
-    (re.compile(r"\bgh\s+pr\s+merge\b"), "merging a PR is a maintainer decision"),
     (re.compile(r"\bgit\s+push\b[^\n;&|]*(\s|:|\+)(refs/heads/)?main\b"),
      "pushing to main is a maintainer decision (open a PR)"),
 ]

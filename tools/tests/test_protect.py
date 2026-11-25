@@ -43,7 +43,6 @@ def test_allows_untrusted_writes(path):
     "echo pwned > tools/live.py",
     "gh pr edit 1 --add-label trusted-change",
     "gh label create trusted-change",
-    "gh pr merge 1 --squash",
     "git push origin main",
     "git push origin HEAD:main",
 ])
@@ -63,6 +62,10 @@ def test_blocks_bash(cmd):
     "grep -n lease ledger/events.jsonl 2>/dev/null | head",
     "cat > notes/sketches/x/s.md <<'EOF'\nsee tools/gate.py\nEOF",
     "git push -u origin debe/collab",
+    # agents ship their own PRs; CI and branch protection decide what lands
+    "git push -q -u origin HEAD",
+    "python3 tools/ship.py \"found_002 checked: degree sequence recognizable\"",
+    "gh pr merge 7 --merge",
 ])
 def test_allows_bash(cmd):
     assert run("Bash", command=cmd) == 0

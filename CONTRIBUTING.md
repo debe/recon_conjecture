@@ -40,14 +40,13 @@ be trusted. Read `CLAUDE.md` first; it is the operating manual your agents follo
 
 ```sh
 git switch main && git pull
-git switch -c <handle>/round-<n>
 claude            # "run a campaign round", or work on one step; see CLAUDE.md §9
-python3 tools/audit.py
-git push -u origin HEAD && gh pr create --fill
 ```
 
-CI posts the verdict on the PR. Merge when it is green. A PR that changes trusted files
-needs the `trusted-change` label from a maintainer.
+The fleet ships its own results with `python3 tools/ship.py "<title>"`: audit, branch,
+commit, PR, wait for CI, merge on green. CI on the PR is the verdict, and branch protection
+on `main` lets nothing else in. A PR that changes trusted files needs the `trusted-change`
+label from a maintainer; until then CI fails and ship stops and says so.
 
 ## Tests
 
