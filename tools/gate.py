@@ -432,7 +432,7 @@ def cmd_check_reduction(bundle_path: str, actor: str, dry: bool = False) -> list
              "sha256": desk.sha256_file(dest), "axioms": axioms, "at": desk.now(), "by": actor})
         rec["children"] = sorted(set(rec["children"]) | set(ids))
         rec["status"] = "reduced"
-        rec["lease"] = None
+        rec.pop("lease", None)
         desk.save(rec)
         desk.event("reduced", parent, actor, reduction=rname, children=ids)
     return ids
@@ -522,7 +522,15 @@ def main(argv: list[str]) -> int:
     a = ap.parse_args(argv)
     try:
         if a.cmd == "precheck":
-            axioms = cmd_precheck(a.target, a.file)
+            sid = desk.base_id(a.target)[0]
+            try:
+                axioms = cmd_precheck(a.target, a.file)
+            except Rejected as e:
+                first = next((ln for ln in str(e).splitlines() if ln.strip()), "")
+                desk.event("precheck", sid, a.actor, ledger=False, target=a.target, ok=False,
+                           reason=first)
+                raise
+            desk.event("precheck", sid, a.actor, ledger=False, target=a.target, ok=True)
             print(f"precheck ok, axioms: {axioms}")
             print("PRECHECK PASSED (not recorded; run `gate.py check` for the verdict)")
             return 0

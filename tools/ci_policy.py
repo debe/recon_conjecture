@@ -32,7 +32,7 @@ APPEND_ONLY = ("lean/Recon/Checked/", "lean/Recon/Statements/")
 TRUSTED = (
     "lean/Recon/Basic.lean", "lean/lakefile.toml", "lean/lean-toolchain",
     "lean/lake-manifest.json", "tools/desk.py", "tools/gate.py", "tools/audit.py",
-    "tools/ci_policy.py", "tools/hooks/", "tools/tests/", ".github/", ".claude/settings.json",
+    "tools/ci_policy.py", "tools/live.py", "tools/hooks/", "tools/tests/", ".github/", ".claude/settings.json",
     ".gitattributes",
 )
 

@@ -37,6 +37,15 @@ def test_allows_untrusted_writes(path):
     "cd lean && rm Recon/Checked/L_x.lean",
     "git checkout -- ledger/",
     "python3 -c 'import desk'",
+    "cat >> tools/gate.py",
+    "echo '{}' 2>/dev/null > lean/Recon/Checked/L_x.lean",
+    "printf x | tee .github/workflows/gate.yml",
+    "echo pwned > tools/live.py",
+    "gh pr edit 1 --add-label trusted-change",
+    "gh label create trusted-change",
+    "gh pr merge 1 --squash",
+    "git push origin main",
+    "git push origin HEAD:main",
 ])
 def test_blocks_bash(cmd):
     assert run("Bash", command=cmd) == 2
@@ -48,6 +57,12 @@ def test_blocks_bash(cmd):
     "cat ledger/steps/found_001.json",
     "cd lean && lake env lean Recon/Scratch/found_001/b1.lean",
     "python3 tools/desk.py summary > notes/rounds/tmp.txt",
+    # regressions: fd duplication and /dev/null are not writes into trusted paths
+    "python3 -m pytest tools/tests -q 2>&1 | tail -5",
+    "ls tools/hooks >/dev/null",
+    "grep -n lease ledger/events.jsonl 2>/dev/null | head",
+    "cat > notes/sketches/x/s.md <<'EOF'\nsee tools/gate.py\nEOF",
+    "git push -u origin debe/collab",
 ])
 def test_allows_bash(cmd):
     assert run("Bash", command=cmd) == 0
