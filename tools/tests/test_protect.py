@@ -31,7 +31,7 @@ def test_allows_untrusted_writes(path):
 
 
 @pytest.mark.parametrize("cmd", [
-    "python3 tools/desk.py approve found_001",
+    "python3 tools/desk.py approve found_iso_hypomorphic",
     "echo x > ledger/events.jsonl",
     "sed -i s/a/b/ lean/Recon/Basic.lean",
     "cd lean && rm Recon/Checked/L_x.lean",
@@ -52,9 +52,9 @@ def test_blocks_bash(cmd):
 
 @pytest.mark.parametrize("cmd", [
     "python3 tools/desk.py summary",
-    "python3 tools/gate.py check found_001 lean/Recon/Scratch/found_001/b1.lean",
-    "cat ledger/steps/found_001.json",
-    "cd lean && lake env lean Recon/Scratch/found_001/b1.lean",
+    "python3 tools/gate.py check found_iso_hypomorphic lean/Recon/Scratch/found_iso_hypomorphic/b1.lean",
+    "cat ledger/steps/found_iso_hypomorphic.json",
+    "cd lean && lake env lean Recon/Scratch/found_iso_hypomorphic/b1.lean",
     "python3 tools/desk.py summary > notes/rounds/tmp.txt",
     # regressions: fd duplication and /dev/null are not writes into trusted paths
     "python3 -m pytest tools/tests -q 2>&1 | tail -5",
@@ -64,7 +64,7 @@ def test_blocks_bash(cmd):
     "git push -u origin debe/collab",
     # agents ship their own PRs; CI and branch protection decide what lands
     "git push -q -u origin HEAD",
-    "python3 tools/ship.py \"found_002 checked: degree sequence recognizable\"",
+    "python3 tools/ship.py \"kelly_degree_sequence checked\"",
     "gh pr merge 7 --merge",
 ])
 def test_allows_bash(cmd):

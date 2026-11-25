@@ -9,6 +9,8 @@ checks what a contributor's machine could get wrong or skip:
   1. the checked library and the frozen statements are append-only
   2. trusted files change only in a PR labelled `trusted-change` (labels are maintainer-only)
   3. ledger step records are never deleted, the event log is append-only
+     (exception for 1 and 3: `desk.py rename` moves a step's files to its new id; the PR
+     records a `renamed` event and needs the `trusted-change` label)
   4. every root step past `proposed` was approved by a maintainer for its current statement
   5. no lease lives in a step record (leases are refs/leases/*)
   6. no reduced step is left with a complete, unassembled reduction
@@ -68,13 +70,54 @@ def maintainers(rev: str) -> set[str]:
     return {ln.strip() for ln in text.splitlines() if ln.strip() and not ln.startswith("#")}
 
 
+def renamed_ids(added_lines: Counter) -> set[str]:
+    """Old ids of the steps that `desk.py rename` moved, from the event lines a PR adds."""
+    out = set()
+    for line in added_lines:
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if e.get("kind") == "renamed" and e.get("renamed_from"):
+            out.add(e["renamed_from"])
+    return out
+
+
+def deleted_step(path: str) -> str | None:
+    """The step id whose statement, checked proof or record lives at `path`, if any."""
+    p = Path(path)
+    if path.startswith("lean/Recon/Statements/S_") and p.suffix == ".lean":
+        return p.stem[len("S_"):]
+    if path.startswith("lean/Recon/Checked/L_") and p.suffix == ".lean":
+        return p.stem[len("L_"):]
+    if path.startswith("ledger/steps/") and p.suffix == ".json":
+        return p.stem
+    return None
+
+
 def check(base: str, head: str, labels: set[str] | None) -> list[str]:
     """labels=None: a push to protected main. Every such push is a merged PR that already
     passed the label rule, and a push event carries no labels, so that rule is skipped."""
     problems: list[str] = []
     diff = changes(base, head)
 
+    old_events = Counter((show(base, "ledger/events.jsonl") or "").splitlines())
+    new_events = Counter((show(head, "ledger/events.jsonl") or "").splitlines())
+    lost = old_events - new_events
+    if lost:
+        problems.append(f"ledger/events.jsonl: {sum(lost.values())} existing line(s) removed or "
+                        f"edited; the event log is append-only")
+    renamed = renamed_ids(new_events - old_events)
+    rename_ok = labels is None or TRUSTED_LABEL in labels
+
     for status, path in diff:
+        sid = deleted_step(path) if status == "D" else None
+        if sid and sid in renamed:
+            # `desk.py rename` moved this step's files to its new id. Like a change to the
+            # judge, that needs a maintainer's label; a push to main re-checks a merged PR.
+            if not rename_ok:
+                problems.append(f"{path}: renaming {sid} needs the `{TRUSTED_LABEL}` label")
+            continue
         if path.startswith(APPEND_ONLY) and status != "A":
             problems.append(f"{path}: {status} on an append-only path (checked results and "
                             f"frozen statements are never modified or deleted)")
@@ -84,13 +127,6 @@ def check(base: str, head: str, labels: set[str] | None) -> list[str]:
     if touched_trusted and labels is not None and TRUSTED_LABEL not in labels:
         problems.append(f"trusted files changed without the `{TRUSTED_LABEL}` label: "
                         + ", ".join(touched_trusted))
-
-    old_events = Counter((show(base, "ledger/events.jsonl") or "").splitlines())
-    new_events = Counter((show(head, "ledger/events.jsonl") or "").splitlines())
-    lost = old_events - new_events
-    if lost:
-        problems.append(f"ledger/events.jsonl: {sum(lost.values())} existing line(s) removed or "
-                        f"edited; the event log is append-only")
 
     # Approval is judged against the maintainers list of the base: a PR cannot add its
     # own approver.

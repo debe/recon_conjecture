@@ -37,7 +37,8 @@ const PROPS = {
 const props = await agent(
   `Using notes/literature/${slug}.md and notes/mathlib/${slug}.md (summaries: ${lit} /// ${lib}), propose at most ` +
   `${maxProposals} new steps in program ${program}, smallest formalizable results first. Check existing ids with ` +
-  `\`python3 tools/desk.py list --program ${program}\` and use the next free <program>_<nnn>. For each: ` +
+  `\`python3 tools/desk.py list --program ${program}\` and name each new step <program>_<slug>, a short snake_case name for what it claims ` +
+  `(e.g. ${program}_degree_sequence, never a number) that is not taken yet. For each: ` +
   `\`python3 tools/desk.py propose <id> --title ... --en ... --lean '<Prop>' --author librarian\` (the Lean body may ` +
   `use only Mathlib and Recon.* from lean/Recon/Basic.lean; no comments, no strings). Fix and retry if desk refuses.`,
   { label: `propose:${slug}`, phase: 'Propose', agentType: 'librarian', schema: PROPS })

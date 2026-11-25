@@ -6,14 +6,14 @@ namespace Recon.Statements
 
 open SimpleGraph
 
-/-- found_001: Isomorphic graphs are hypomorphic
+/-- found_iso_hypomorphic: Isomorphic graphs are hypomorphic
 
 For every n and all graphs G, H on Fin n: if G and H are isomorphic, then G and H have the same deck (are hypomorphic).
 -/
-def S_found_001 : Prop :=
+def S_found_iso_hypomorphic : Prop :=
   ∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Nonempty (G ≃g H) → Recon.Hypomorphic G H
 
-/-- Negated twin of `S_found_001`: proving it refutes the step. -/
-def S_found_001_neg : Prop := ¬ S_found_001
+/-- Negated twin of `S_found_iso_hypomorphic`: proving it refutes the step. -/
+def S_found_iso_hypomorphic_neg : Prop := ¬ S_found_iso_hypomorphic
 
 end Recon.Statements

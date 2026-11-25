@@ -1,12 +1,12 @@
 {
-  "id": "found_001",
+  "id": "found_iso_hypomorphic",
   "program": "found",
   "title": "Isomorphic graphs are hypomorphic",
   "statement_en": "For every n and all graphs G, H on Fin n: if G and H are isomorphic, then G and H have the same deck (are hypomorphic).",
   "statement_lean": "∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Nonempty (G ≃g H) → Recon.Hypomorphic G H",
   "statement_imports": [],
-  "statement_file": "lean/Recon/Statements/S_found_001.lean",
-  "statement_sha256": "49733e140cd4e0f2da10fd9883cad5412ace17d29c1379762617cf0fbfdc2809",
+  "statement_file": "lean/Recon/Statements/S_found_iso_hypomorphic.lean",
+  "statement_sha256": "a900b68867f286d69c3bae55c117867d327d2fa89313116d416d2831a06bc438",
   "status": "checked",
   "author": "human",
   "created": "2026-11-24T19:59:37+00:00",
@@ -18,25 +18,25 @@
       "reviewer": "fid-backtranslate",
       "verdict": "pass",
       "notes": "# Fidelity review: found_001 (lens: back-translation, reviewer fid-backtranslate)\n\nStatement file: lean/Recon/Statements/S_found_001.lean\nsha256 49733e140cd4e0f2da10fd9883cad5412ace17d29c1379762617cf0fbfdc2809 (matches ledger statement_sha256\nand human_approved_sha256).\n\n## 1. Independent reading of the Lean (written before reading statement_en)\n\n`∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Nonempty (G ≃g H) → Recon.Hypomorphic G H`\n\nExpanding `Recon.Hypomorphic` and `Recon.card` (Basic.lean):\n\n> For every natural number n and every pair of simple graphs G, H on the vertex set\n> {0, ..., n-1}: if there is a graph isomorphism from G to H (a bijection f of the vertices with\n> G.Adj a b <-> H.Adj (f a) (f b)), then there is a bijection sigma of {0, ..., n-1} such that,\n> for every vertex x, the subgraph of G induced on all vertices except x is isomorphic\n> to the subgraph of H induced on all vertices except sigma(x).\n\nI confirmed this unfolding mechanically. In a scratch file importing only\n`Recon.Statements.S_found_001`, `S_found_001 ↔ ∀ n G H, Nonempty (G ≃g H) → ∃ σ : Fin n ≃ Fin n,\n∀ x, Nonempty (G.induce {x}ᶜ ≃g H.induce {σ x}ᶜ)` is closed by `Iff.rfl`, and the scratch file\nelaborates under the pinned toolchain.\n\n## 2. Comparison with statement_en, clause by clause\n\nstatement_en: \"For every n and all graphs G, H on Fin n: if G and H are isomorphic, then G and H\nhave the same deck (are hypomorphic).\"\n\n| English clause | Lean | Match |\n|---|---|---|\n| for every n | `∀ (n : ℕ)` | yes. No n >= 3 bound, and none is needed: the implication iso => hypo holds for every n, including n = 0, 1, 2. The English likewise has no bound. |\n| all graphs G, H on Fin n | `(G H : SimpleGraph (Fin n))` | yes. Both graphs use the same vertex type `Fin n`, as the English says. |\n| G and H are isomorphic | `Nonempty (G ≃g H)` | yes. `≃g` is `RelIso G.Adj H.Adj`: a bijection that preserves and reflects adjacency, which is the correct notion of graph isomorphism. `Nonempty` is the right Prop-level \"there exists an isomorphism\". |\n| same deck (hypomorphic) | `Recon.Hypomorphic G H` | yes. There is a bijection sigma with card G x ≅ card H (sigma x) for all x. That is the standard Bondy–Hemminger definition, and it is equivalent to the multisets of card isomorphism classes being equal. Cards are induced subgraphs on {x}ᶜ (vertex deletion, not edge deletion), and card isomorphism is again `≃g`. |\n\nQuantifier order and scope: n, G and H are universally quantified at the front. The hypothesis\nscopes over the conclusion only. The existential over sigma sits inside Hypomorphic, after G and H\nare fixed, and that is the correct order (sigma may depend on G and H).\n\n## 3. Failure-mode checklist\n\n- Wrong quantifier order or scope: none.\n- Missing or extra hypothesis: none. The absence of `3 ≤ n` is correct here and matches the English.\n- `Fin n` against arbitrary types: the English says Fin n, and the Lean uses Fin n. (A general-type\n  version would be strictly stronger. It is not what is claimed and not needed.)\n- ≤ against <, or off-by-one: no numeric comparisons appear.\n- Vacuous: no. The hypothesis is satisfiable, for example by G = H with `Iso.refl`.\n- Trivially true: no. It is easy, but not definitionally true. A proof needs to transport each card\n  along the isomorphism restricted to {x}ᶜ -> {f x}ᶜ, which is a real (small) Lean lemma. That\n  makes it an appropriate foundational target.\n- Notion of isomorphism, card or deck: all correct (see the table).\n- Nonempty against an explicit structure: `Nonempty` is used in both the hypothesis and the card\n  condition, and that is appropriate for a Prop.\n- Coercions: `({x}ᶜ : Set (Fin n))` is coerced to a subtype, which is the intended vertex set\n  of the card. There are no numeric coercions.\n\nSanity: the statement is true (take sigma = f and restrict f to the complements). So the\nnegated twin should not be provable, and nothing here suggests otherwise.\n\n## 4. Side observation (not a fidelity issue)\n\nThe ledger record already shows `human_approved: true` / `approved_by: debe` while `fidelity` is\nempty and the status is `proposed`. The lifecycle in CLAUDE.md asks for 2 fidelity passes before\napproval. The human may want to confirm that this ordering was intended before freezing.\n\n## Verdict: PASS\n\nThe Lean statement says exactly what statement_en says.\n",
-      "sha256": "49733e140cd4e0f2da10fd9883cad5412ace17d29c1379762617cf0fbfdc2809",
+      "sha256": "a900b68867f286d69c3bae55c117867d327d2fa89313116d416d2831a06bc438",
       "at": "2026-11-25T10:31:56+00:00"
     },
     {
       "reviewer": "fid-testing",
       "verdict": "pass",
       "notes": "# Fidelity review: found_001 (lens: testing), reviewer fid-testing\n\nStatement (Lean): `∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Nonempty (G ≃g H) → Recon.Hypomorphic G H`\nEnglish: \"For every n and all graphs G, H on Fin n: if G and H are isomorphic, then G and H\nhave the same deck (are hypomorphic).\"\n\n## Predicates (script: `notes/sketches/found_001/fidelity_fid-testing.py`)\n\n- **Lean reading.** `lean_stmt(G,H) = ¬iso(G,H) ∨ lean_hypomorphic(G,H)`. Here\n  `lean_hypomorphic` is a literal encoding of `Recon.Hypomorphic`. It uses backtracking to\n  search for a bijection σ : V → W with `card G x ≅ card H (σ x)` for every x. A card is the\n  induced subgraph on `{x}ᶜ` and keeps its original labels, as the Lean subtype does.\n  Isomorphism is `nx.is_isomorphic`.\n- **English reading.** `english_stmt(G,H) = ¬iso(G,H) ∨ same_deck(G,H)`. Here `same_deck`\n  compares the multisets of isomorphism classes of cards, using greedy class matching with\n  `nx.is_isomorphic`. It does not use `canon`. The script also cross-checks the tool's\n  `small_graphs.hypomorphic` (deck_key).\n\n## Runs (all n = 0..6, atlas via `small_graphs.all_graphs`)\n\n1. **Statement comparison on labeled pairs.** For each G, H ranges over relabelings of G\n   (every permutation for n ≤ 5, the identity plus 40 random permutations for n = 6).\n   Total: 10770 labeled pairs, and the hypothesis holds on every one of them.\n   Disagreements between lean_stmt and english_stmt: **0**. Pairs where either is false: **0**.\n2. **Definition comparison.** `Recon.Hypomorphic` was compared with \"same multiset deck\"\n   on every ordered pair of unlabeled graphs, with H randomly relabeled: 25635 pairs.\n   Disagreements: **0**. deck_key also agrees everywhere. There are 211 hypomorphic pairs.\n   Only 2 of them are non-isomorphic, both at n = 2 (K₂ against 2K₁, in both orders). This\n   matches the Basic.lean anchor and McKay's verification for 3 ≤ n ≤ 6. So the Lean\n   definition is neither trivially true nor just isomorphism.\n3. **Non-isomorphic pairs.** Both statement predicates are vacuously true there, so the\n   two readings cannot differ on them.\n\n## Vacuity and triviality\n\n- The hypothesis `Nonempty (G ≃g H)` is satisfiable, for example with G = H. It held on all\n  10770 test pairs, so the statement is not vacuous.\n- The conclusion is not trivially true: `Hypomorphic` fails on 25635 − 211 = 25424 of the\n  definition-test pairs.\n- The statement is an easy result, but it is the intended one. It is the first `found`\n  target in CLAUDE.md §10.\n\n## Failure-mode checklist\n\n- **Quantifiers.** n, G and H are all universal, and the implication sits inside them.\n  This matches the English.\n- **No n ≥ 3 hypothesis.** This is correct. Isomorphic ⇒ hypomorphic holds for every n,\n  including 0, 1 and 2, as the tests confirm. The English says \"for every n\".\n- **Vertex type.** Both G and H live on `Fin n`, as the English says.\n- **Isomorphism.** `≃g` is Mathlib's graph isomorphism (`RelIso` on `Adj`). Wrapping it in\n  `Nonempty` correctly expresses \"are isomorphic\".\n- **Deck.** `Hypomorphic` (∃ bijection matching cards up to isomorphism) agrees with\n  multiset deck equality on all 25635 tested pairs. These are equivalent in general,\n  because a bijection between card lists that respects an equivalence relation exists iff\n  the class multisets coincide.\n- **Coercions.** The only coercion is the `{x}ᶜ` subtype in `card`, and it is harmless.\n\n## Verdict: PASS\n\nNo mismatch was found between the Lean statement and its English.\n\nSide observation, not a fidelity issue: `desk.py status` already shows `human_approved:\ntrue` with `approved_by: debe` while the step is `proposed` with no fidelity records yet.\nThe human may want to confirm that this ordering is intended.\n",
-      "sha256": "49733e140cd4e0f2da10fd9883cad5412ace17d29c1379762617cf0fbfdc2809",
+      "sha256": "a900b68867f286d69c3bae55c117867d327d2fa89313116d416d2831a06bc438",
       "at": "2026-11-25T10:34:18+00:00"
     }
   ],
   "children": [],
   "reductions": [],
-  "negated_twin": "found_001_neg",
+  "negated_twin": "found_iso_hypomorphic_neg",
   "dead_ends": [],
   "sketches": [],
   "checked": {
-    "file": "lean/Recon/Checked/L_found_001.lean",
-    "sha256": "222d9393fb31bd57f4e6cf80b0a02c5c5da81bae45505f633ed6e62a2e246c33",
+    "file": "lean/Recon/Checked/L_found_iso_hypomorphic.lean",
+    "sha256": "2348c270e3253602fca6f9b663aa70169b7be15b753614f3e973f88af39cb6ab",
     "axioms": [
       "propext",
       "Quot.sound"
@@ -48,7 +48,8 @@
   },
   "refuted": null,
   "priority": 90,
-  "human_approved_sha256": "49733e140cd4e0f2da10fd9883cad5412ace17d29c1379762617cf0fbfdc2809",
+  "human_approved_sha256": "a900b68867f286d69c3bae55c117867d327d2fa89313116d416d2831a06bc438",
   "approved_by": "debe",
-  "frozen_at": "2026-11-25T10:34:43+00:00"
+  "frozen_at": "2026-11-25T10:34:43+00:00",
+  "renamed_from": "found_001"
 }

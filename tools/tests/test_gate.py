@@ -16,8 +16,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import desk  # noqa: E402
 import gate  # noqa: E402
 
-S1 = "gatetest_001"
-S2 = "gatetest_002"
+S1 = "gatetest_add_zero"
+S2 = "gatetest_add_zero_both"      # S1 is a prefix of S2: renames must not touch S2
+S1_RENAMED = "gatetest_zero_right"
+KIDS = [f"{S2}__right", f"{S2}__left"]
 DECL = f"Recon.Checked.L_{S1}"
 STMT = f"Recon.Statements.S_{S1}"
 
@@ -55,8 +57,8 @@ def _cleanup_lean(ids: list[str]) -> None:
 def quiet_identity():
     """Tests approve as a fixed handle and never publish live events."""
     import os
-    saved = {k: os.environ.get(k) for k in ("RECON_HANDLE", "RECON_LIVE")}
-    os.environ.update(RECON_HANDLE="tester", RECON_LIVE="off")
+    saved = {k: os.environ.get(k) for k in ("RECON_HANDLE", "RECON_LIVE", "RECON_LEASES")}
+    os.environ.update(RECON_HANDLE="tester", RECON_LIVE="off", RECON_LEASES="local")
     yield
     for k, v in saved.items():
         if v is None:
@@ -71,7 +73,7 @@ def ledger(tmp_path_factory):
     saved = {k: getattr(desk, k) for k in ("LEDGER", "STEPS", "EVENTS", "PROGRAMS", "LOCK")}
     desk.LEDGER, desk.STEPS = tmp, tmp / "steps"
     desk.EVENTS, desk.PROGRAMS, desk.LOCK = tmp / "events.jsonl", tmp / "programs.json", tmp / ".lock"
-    ids = [S1, S2, f"{S2}_r1a", f"{S2}_r1b"]
+    ids = [S1, S2, S1_RENAMED, *KIDS]
     _cleanup_lean(ids)
     assert desk.main(["program-add", "gatetest", "--title", "t", "--mandate", "tests"]) == 0
     for sid, body in ((S1, "∀ n : ℕ, n + 0 = n"), (S2, "∀ n : ℕ, n + 0 = n ∧ 0 + n = n")):
@@ -90,19 +92,37 @@ def ledger(tmp_path_factory):
 # ---------------------------------------------------------------- desk rules (fast)
 
 def test_author_cannot_review(ledger):
-    assert desk.main(["propose", "gatetest_003", "--title", "t", "--en", "e",
+    assert desk.main(["propose", "gatetest_self_review", "--title", "t", "--en", "e",
                       "--lean", "∀ n : ℕ, n = n", "--author", "alice"]) == 0
-    assert desk.main(["fidelity", "gatetest_003", "--reviewer", "alice", "--verdict", "pass"]) == 1
-    desk.statement_file("gatetest_003").unlink()
+    assert desk.main(["fidelity", "gatetest_self_review", "--reviewer", "alice", "--verdict", "pass"]) == 1
+    desk.statement_file("gatetest_self_review").unlink()
 
 
 def test_root_needs_human_approval(ledger):
-    assert desk.main(["propose", "gatetest_004", "--title", "t", "--en", "e",
+    assert desk.main(["propose", "gatetest_needs_approval", "--title", "t", "--en", "e",
                       "--lean", "∀ n : ℕ, n = n + 0", "--author", "alice"]) == 0
     for r in ("rev-a", "rev-b"):
-        desk.main(["fidelity", "gatetest_004", "--reviewer", r, "--verdict", "pass"])
-    assert desk.main(["freeze", "gatetest_004"]) == 1
-    desk.statement_file("gatetest_004").unlink()
+        desk.main(["fidelity", "gatetest_needs_approval", "--reviewer", r, "--verdict", "pass"])
+    assert desk.main(["freeze", "gatetest_needs_approval"]) == 1
+    desk.statement_file("gatetest_needs_approval").unlink()
+
+
+@pytest.mark.parametrize("sid", ["gatetest_001", "gatetest", "gatetest_Foo", "gatetest__x",
+                                 "gatetest_x_neg", "gatetest_9lives", "Gatetest_x"])
+def test_ids_name_claims_not_counters(ledger, sid):
+    assert desk.main(["propose", sid, "--title", "t", "--en", "e",
+                      "--lean", "∀ n : ℕ, n = n", "--author", "alice"]) == 1
+    assert not desk.step_path(sid).exists()
+
+
+@pytest.mark.parametrize("slug", ["", "1a", "a__b", "x_neg", "neg", "Edge"])
+def test_child_slugs_rejected(slug):
+    with pytest.raises(desk.DeskError):
+        desk.child_id("p_x", slug)
+
+
+def test_child_id():
+    assert desk.child_id("kelly_degree_sequence", "edge_count") == "kelly_degree_sequence__edge_count"
 
 
 @pytest.mark.parametrize("body", ["False", "sorry", "by native_decide", "\"x\" = \"x\"",
@@ -175,23 +195,50 @@ def test_check_accepts_and_closes(ledger, tmp_path):
         gate.cmd_check(S1, write(tmp_path, "good2.lean", GOOD), "tester")
 
 
+def test_rename_moves_a_checked_step(ledger):
+    old_sha = desk.load(S1)["statement_sha256"]
+    s2_text = desk.statement_file(S2).read_text()
+    assert desk.main(["rename", S1, S1_RENAMED]) == 0
+    rec = desk.load(S1_RENAMED)
+    assert rec["status"] == "checked" and rec["renamed_from"] == S1
+    assert rec["negated_twin"] == f"{S1_RENAMED}_neg"
+    assert rec["human_approved_sha256"] == rec["statement_sha256"] != old_sha   # carried over
+    assert all(f["sha256"] == rec["statement_sha256"] for f in rec["fidelity"])
+    assert not desk.step_path(S1).exists() and not desk.statement_file(S1).exists()
+    assert not (gate.CHECKED / f"L_{S1}.lean").exists()
+    proof = gate.CHECKED / f"L_{S1_RENAMED}.lean"
+    assert rec["checked"]["file"].endswith(f"L_{S1_RENAMED}.lean")
+    assert rec["checked"]["sha256"] == desk.sha256_file(proof)
+    assert S1 not in proof.read_text()
+    assert f"S_{S1_RENAMED}_neg" in desk.statement_file(S1_RENAMED).read_text()
+    assert desk.statement_file(S2).read_text() == s2_text         # the prefix sibling is untouched
+    assert desk.main(["rename", S1_RENAMED, "kelly_zero_right"]) == 1   # keeps its program
+
+
 def test_reduction_then_assembly(ledger, tmp_path):
+    a, b = KIDS
     proof = f"""import Mathlib
 import Recon.Statements.S_{S2}
-import Recon.Statements.S_{S2}_r1a
-import Recon.Statements.S_{S2}_r1b
+import Recon.Statements.S_{a}
+import Recon.Statements.S_{b}
 
-theorem Recon.Checked.R_{S2}_r1 : Recon.Statements.S_{S2}_r1a → Recon.Statements.S_{S2}_r1b → Recon.Statements.S_{S2} :=
+theorem Recon.Checked.R_{S2}_r1 : Recon.Statements.S_{a} → Recon.Statements.S_{b} → Recon.Statements.S_{S2} :=
   fun ha hb n => ⟨ha n, hb n⟩
 """
     import json
     bundle = {"parent": S2, "by": "tester", "proof_file": write(tmp_path, "r1.lean", proof),
               "children": [
-                  {"title": "a", "statement_en": "n+0=n", "statement_lean": "∀ n : ℕ, n + 0 = n"},
-                  {"title": "b", "statement_en": "0+n=n", "statement_lean": "∀ n : ℕ, 0 + n = n"}]}
+                  {"slug": "right", "title": "a", "statement_en": "n+0=n",
+                   "statement_lean": "∀ n : ℕ, n + 0 = n"},
+                  {"slug": "left", "title": "b", "statement_en": "0+n=n",
+                   "statement_lean": "∀ n : ℕ, 0 + n = n"}]}
     bpath = write(tmp_path, "bundle.json", json.dumps(bundle))
-    assert gate.cmd_check_reduction(bpath, "tester", dry=True) == [f"{S2}_r1a", f"{S2}_r1b"]
-    assert not desk.statement_file(f"{S2}_r1a").exists()  # dry run leaves nothing
+    assert gate.cmd_check_reduction(bpath, "tester", dry=True) == KIDS
+    assert not desk.statement_file(a).exists()  # dry run leaves nothing
+    unnamed = {**bundle, "children": [{k: v for k, v in c.items() if k != "slug"}
+                                      for c in bundle["children"]]}
+    with pytest.raises(gate.Rejected):
+        gate.cmd_check_reduction(write(tmp_path, "unnamed.json", json.dumps(unnamed)), "tester", dry=True)
     ids = gate.cmd_check_reduction(bpath, "tester")
     assert desk.load(S2)["status"] == "reduced"
     for cid, prf in zip(ids, ("Nat.add_zero n", "Nat.zero_add n")):

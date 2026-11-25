@@ -30,12 +30,14 @@ const prop = await agent(
   `Reduce step ${step} into 2-4 strictly easier child statements whose conjunction implies it. ` +
   (hints.length ? `Builders reported these missing lemmas; use them if they fit: ${JSON.stringify(hints)}. ` : '') +
   `1) \`python3 tools/desk.py status ${step}\` and read its statement file. ` +
-  `2) \`python3 tools/gate.py next-reduction ${step}\` gives the reduction theorem name, child ids and imports. ` +
+  `2) \`python3 tools/gate.py next-reduction ${step}\` gives the reduction theorem name and imports. ` +
+  `Name each child with a slug: a short snake_case name for what it claims, starting with a letter ` +
+  `(e.g. edge_count, never a number); its step id is ${step}__<slug>. ` +
   `3) Write the proof file lean/Recon/Scratch/${step}/reduction.lean proving ` +
-  `\`theorem Recon.Checked.R_${step}_r<k> : Recon.Statements.S_<child a> → ... → Recon.Statements.S_${step} :=\` ` +
+  `\`theorem Recon.Checked.R_${step}_r<k> : Recon.Statements.S_${step}__<slug 1> → ... → Recon.Statements.S_${step} :=\` ` +
   `(imports: Mathlib, the parent statement and each child statement module, nothing else). ` +
   `4) Write notes/sketches/${step}/reduction.json: {"parent": "${step}", "by": "reducer", "proof_file": "lean/Recon/Scratch/${step}/reduction.lean", ` +
-  `"children": [{"title": ..., "statement_en": ..., "statement_lean": <Lean Prop using Recon.* defs>}, ...]}. ` +
+  `"children": [{"slug": ..., "title": ..., "statement_en": ..., "statement_lean": <Lean Prop using Recon.* defs>}, ...]}. ` +
   `5) Iterate with \`python3 tools/gate.py check-reduction notes/sketches/${step}/reduction.json --dry\` until PRECHECK PASSED. ` +
   `Do NOT run it without --dry. A child must not restate the parent; a useless split (P → P) earns nothing.`,
   { label: `reducer:${step}`, phase: 'Propose', agentType: 'builder', schema: PROPOSAL })

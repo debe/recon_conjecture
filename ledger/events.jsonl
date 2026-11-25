@@ -10,3 +10,4 @@
 {"ts": "2026-11-25T10:34:43+00:00", "kind": "frozen", "step": "found_001", "actor": "debe/desk"}
 {"ts": "2026-11-25T10:54:37+00:00", "kind": "verdict", "step": "found_001", "actor": "debe/b1", "target": "found_001", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_001.lean"}
 {"ts": "2026-11-25T10:54:37+00:00", "kind": "checked", "step": "found_001", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_001.lean"}
+{"ts": "2026-11-25T12:01:56+00:00", "kind": "renamed", "step": "found_iso_hypomorphic", "actor": "debe/desk", "renamed_from": "found_001"}

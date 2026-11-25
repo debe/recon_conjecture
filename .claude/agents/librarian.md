@@ -27,7 +27,8 @@ paths under `lean/.lake/packages/mathlib/Mathlib/`) and the gaps. Relevant areas
 - `Fintype.card` and counting.
 
 Proposing steps: you may run
-`python3 tools/desk.py propose <program>_<nnn> --title ... --en ... --lean ... --author <label>`.
+`python3 tools/desk.py propose <program>_<slug> --title ... --en ... --lean ... --author <label>`.
+- The id says what the step claims, in snake_case: `kelly_degree_sequence`, never `kelly_002`.
 - The `--lean` body is a Prop using `Recon.*` definitions from `lean/Recon/Basic.lean`.
 - Proposed steps wait for fidelity review and human approval. You never freeze them.
 
