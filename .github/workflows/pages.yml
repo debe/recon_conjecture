@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read     # deploy-pages looks up this run's artifact
   pages: write
   id-token: write
 
@@ -27,12 +28,12 @@ jobs:
         env:
           RECON_LIVE: "off"
         run: python3 tools/snapshot.py --out site/state.json
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Tell the live view (merged)
         if: success()
         continue-on-error: true
