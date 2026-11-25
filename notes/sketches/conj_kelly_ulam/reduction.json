@@ -1,0 +1,9 @@
+{"parent": "conj_kelly_ulam", "by": "reducer", "proof_file": "lean/Recon/Scratch/conj_kelly_ulam/reduction.lean",
+ "children": [
+  {"slug": "disconnected", "title": "Disconnected graphs are reconstructible",
+   "statement_en": "Every disconnected graph on at least 3 vertices is reconstructible (Kelly 1957).",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => ¬ G.Connected)"},
+  {"slug": "connected_dominating_or_diam2", "title": "Self- and co-connected graphs with a dominating edge or diameter at most 2 in both G and its complement are reconstructible",
+   "statement_en": "Every graph G on at least 3 vertices such that G and its complement are both connected, and either G has a dominating edge (an edge uv such that every vertex equals u or v or is adjacent to u or v) or every pair of vertices has distance at most 2 both in G and in its complement, is reconstructible. (Aravind-Monikandan arXiv:2601.00620 Lemma 4, UNVERIFIED; notes/literature/structural_reductions.md C3/C4.)",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => G.Connected ∧ Gᶜ.Connected ∧ ((∃ u v : Fin n, G.Adj u v ∧ ∀ x : Fin n, x = u ∨ x = v ∨ G.Adj x u ∨ G.Adj x v) ∨ ∀ u v : Fin n, G.edist u v ≤ 2 ∧ Gᶜ.edist u v ≤ 2))"}
+ ]}

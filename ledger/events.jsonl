@@ -87,3 +87,8 @@
 {"ts": "2026-11-25T13:52:25+00:00", "kind": "verdict", "step": "discon_isolated_vertex", "actor": "debe/b1", "target": "discon_isolated_vertex", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_discon_isolated_vertex.lean"}
 {"ts": "2026-11-25T13:52:25+00:00", "kind": "checked", "step": "discon_isolated_vertex", "actor": "debe/b1", "file": "lean/Recon/Checked/L_discon_isolated_vertex.lean"}
 {"ts": "2026-11-25T13:52:27+00:00", "kind": "fidelity", "step": "conj_kelly_ulam", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T13:54:46+00:00", "kind": "approved", "step": "conj_kelly_ulam", "actor": "debe/human"}
+{"ts": "2026-11-25T13:54:51+00:00", "kind": "frozen", "step": "conj_kelly_ulam", "actor": "debe/desk"}
+{"ts": "2026-11-25T13:58:46+00:00", "kind": "frozen", "step": "conj_kelly_ulam__disconnected", "actor": "debe/reducer", "via": "reduction R_conj_kelly_ulam_r1"}
+{"ts": "2026-11-25T13:58:46+00:00", "kind": "frozen", "step": "conj_kelly_ulam__connected_dominating_or_diam2", "actor": "debe/reducer", "via": "reduction R_conj_kelly_ulam_r1"}
+{"ts": "2026-11-25T13:58:46+00:00", "kind": "reduced", "step": "conj_kelly_ulam", "actor": "debe/reducer", "reduction": "R_conj_kelly_ulam_r1", "children": ["conj_kelly_ulam__disconnected", "conj_kelly_ulam__connected_dominating_or_diam2"]}
