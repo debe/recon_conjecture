@@ -13,9 +13,15 @@ Commands (run `python3 tools/desk.py -h`):
   approve <id>                    HUMAN ONLY: approve a root statement for freezing
   freeze <id>                     proposed -> frozen (roots need 2 fidelity passes + approve)
   next [--program P]              suggest the next frozen, unleased step
-  lease <id> --holder H           take a lease (default 120 min)
-  beat <id> --holder H            renew a lease
+  lease <id> --holder H           take a lease (default 120 min); atomic across machines
+  beat <id> --holder H [--note T] renew a lease, saying what the holder is doing now
   release <id> --holder H --reason R [--note T]   give a step back with a structured reason
+  leases                          list live and expired leases
+
+Leases are git refs `refs/leases/<id>` on origin (or in this repo when there is no origin),
+written with compare-and-swap pushes: exactly one claimant wins. They are coordination, not
+safety. Identity: `git config recon.handle <github-handle>` (or RECON_HANDLE); holders and
+actors are recorded as `<handle>/<label>`.
   dead-end <id> --approach A --reason R --by B     record a failed approach
   sketch <id> --path P --by B     attach a paper sketch (notes/sketches/...)
   program-add ...                 add a program (line of attack)
@@ -35,6 +41,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+import live  # noqa: E402
+
 LEAN = ROOT / "lean"
 STATEMENTS = LEAN / "Recon" / "Statements"
 CHECKED = LEAN / "Recon" / "Checked"
@@ -117,11 +126,32 @@ def all_steps() -> list[dict]:
     return [json.loads(p.read_text()) for p in sorted(STEPS.glob("*.json"))]
 
 
-def event(kind: str, step: str | None, actor: str, **data) -> None:
-    LEDGER.mkdir(parents=True, exist_ok=True)
-    line = {"ts": now(), "kind": kind, "step": step, "actor": actor, **data}
-    with open(EVENTS, "a") as fh:
-        fh.write(json.dumps(line, ensure_ascii=False) + "\n")
+def handle() -> str:
+    """This machine's GitHub handle: RECON_HANDLE, else `git config recon.handle`."""
+    h = os.environ.get("RECON_HANDLE")
+    if not h:
+        p = subprocess.run(["git", "config", "recon.handle"], cwd=ROOT, capture_output=True,
+                           text=True)
+        h = p.stdout.strip()
+    return h or "local"
+
+
+def qualify(actor: str) -> str:
+    """'b1' -> 'debe/b1'. Already-qualified names and 'human' stay as they are."""
+    if "/" in actor:
+        return actor
+    return f"{handle()}/{actor}"
+
+
+def event(kind: str, step: str | None, actor: str, ledger: bool = True, **data) -> None:
+    """Append to the graveyard (ledger/events.jsonl) and mirror to the live view."""
+    actor = qualify(actor)
+    if ledger:
+        LEDGER.mkdir(parents=True, exist_ok=True)
+        line = {"ts": now(), "kind": kind, "step": step, "actor": actor, **data}
+        with open(EVENTS, "a") as fh:
+            fh.write(json.dumps(line, ensure_ascii=False) + "\n")
+    live.emit(kind, step, actor, **data)
 
 
 def load_programs() -> list[dict]:
@@ -141,11 +171,127 @@ def base_id(target: str) -> tuple[str, bool]:
     return target, False
 
 
-def lease_live(rec: dict) -> bool:
-    lease = rec.get("lease")
-    if not lease:
+# --------------------------------------------------------------------------- leases (git refs)
+
+LEASE_REPO = ROOT          # tests point this at a scratch clone
+EMPTY_TREE_INPUT = ""      # `git mktree` on empty input writes the empty tree
+
+
+class LeaseLost(DeskError):
+    pass
+
+
+def _git(*args: str, check: bool = True) -> subprocess.CompletedProcess:
+    env = {**os.environ, "GIT_AUTHOR_NAME": "recon-desk", "GIT_AUTHOR_EMAIL": "desk@invalid",
+           "GIT_COMMITTER_NAME": "recon-desk", "GIT_COMMITTER_EMAIL": "desk@invalid",
+           "GIT_TERMINAL_PROMPT": "0"}
+    p = subprocess.run(["git", *args], cwd=LEASE_REPO, capture_output=True, text=True, env=env,
+                       input=EMPTY_TREE_INPUT if args[:1] == ("mktree",) else None, timeout=60)
+    if check and p.returncode != 0:
+        raise DeskError(f"git {' '.join(args[:2])} failed: {p.stderr.strip()[-500:]}")
+    return p
+
+
+def _remote() -> bool:
+    if os.environ.get("RECON_LEASES") == "local":
         return False
-    return _dt.datetime.fromisoformat(lease["expires"]) > _dt.datetime.now(_dt.timezone.utc)
+    return _git("remote", "get-url", "origin", check=False).returncode == 0
+
+
+def _expired(info: dict) -> bool:
+    return _dt.datetime.fromisoformat(info["expires"]) <= _dt.datetime.now(_dt.timezone.utc)
+
+
+def read_leases() -> dict[str, dict]:
+    """Every lease, live or expired: {step: {holder, since, expires, note, sha}}."""
+    if _remote():
+        _git("fetch", "--quiet", "--prune", "--no-tags", "origin",
+             "+refs/leases/*:refs/remote-leases/*")
+        ns = "refs/remote-leases/"
+    else:
+        ns = "refs/leases/"
+    out = _git("for-each-ref", "--format=%(objectname) %(refname) %(contents:subject)", ns).stdout
+    leases = {}
+    for line in out.splitlines():
+        sha, ref, subject = (line.split(" ", 2) + [""])[:3]
+        try:
+            info = json.loads(subject)
+        except json.JSONDecodeError:
+            continue
+        info["sha"] = sha
+        leases[ref.removeprefix(ns)] = info
+    return leases
+
+
+def live_lease(leases: dict[str, dict], sid: str) -> dict | None:
+    info = leases.get(sid)
+    return info if info and not _expired(info) else None
+
+
+def _cas(sid: str, new: str | None, expect: str) -> bool:
+    """Set (or delete, new=None) refs/leases/<sid> only if it currently equals `expect`
+    ('' = must not exist). True when this caller won."""
+    ref = f"refs/leases/{sid}"
+    if _remote():
+        spec = f"{new}:{ref}" if new else f":{ref}"
+        p = _git("push", "--quiet", "--porcelain", f"--force-with-lease={ref}:{expect}",
+                 "origin", spec, check=False)
+        if p.returncode == 0:
+            return True
+        if "stale info" in p.stdout + p.stderr or "rejected" in p.stdout + p.stderr:
+            return False
+        raise DeskError(f"lease push failed: {(p.stdout + p.stderr).strip()[-500:]}")
+    if new:
+        p = _git("update-ref", ref, new, expect or "0" * 40, check=False)
+    else:
+        p = _git("update-ref", "-d", ref, expect, check=False)
+    return p.returncode == 0
+
+
+def _lease_object(holder: str, minutes: int, note: str | None, since: str | None) -> tuple[str, dict]:
+    exp = _dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(minutes=minutes)
+    info = {"holder": holder, "since": since or now(),
+            "expires": exp.replace(microsecond=0).isoformat()}
+    if note:
+        info["note"] = note[:200]
+    tree = _git("mktree").stdout.strip()
+    sha = _git("commit-tree", tree, "-m", json.dumps(info, ensure_ascii=False)).stdout.strip()
+    return sha, info
+
+
+def acquire(sid: str, holder: str, minutes: int, note: str | None = None) -> dict:
+    """Take or renew a lease. Raises DeskError if someone else holds it or wins the race."""
+    holder = qualify(holder)
+    cur = read_leases().get(sid)
+    if cur and not _expired(cur) and cur["holder"] != holder:
+        raise DeskError(f"{sid} is leased by {cur['holder']} until {cur['expires']}")
+    mine = cur and cur["holder"] == holder
+    sha, info = _lease_object(holder, minutes, note, cur["since"] if mine else None)
+    if not _cas(sid, sha, cur["sha"] if cur else ""):
+        raise LeaseLost(f"lost the race for {sid}: another holder took it just now")
+    return info
+
+
+def renew(sid: str, holder: str, minutes: int, note: str | None = None) -> dict:
+    holder = qualify(holder)
+    cur = read_leases().get(sid)
+    if not cur or cur["holder"] != holder:
+        raise DeskError(f"{holder} does not hold the lease on {sid}"
+                        + (f" ({cur['holder']} does)" if cur else ""))
+    return acquire(sid, holder, minutes, note)
+
+
+def drop(sid: str, holder: str) -> bool:
+    """Delete our (or an expired) lease. False when there was none."""
+    holder = qualify(holder)
+    cur = read_leases().get(sid)
+    if not cur:
+        return False
+    if cur["holder"] != holder and not _expired(cur):
+        raise DeskError(f"lease on {sid} is held by {cur['holder']}")
+    if not _cas(sid, None, cur["sha"]):
+        raise LeaseLost(f"lease on {sid} changed while releasing it")
+    return True
 
 
 # --------------------------------------------------------------------------- statements
@@ -237,7 +383,6 @@ def new_record(step_id: str, program: str, title: str, statement_en: str, body: 
         "children": [],
         "reductions": [],
         "negated_twin": f"{step_id}_neg",
-        "lease": None,
         "dead_ends": [],
         "sketches": [],
         "checked": None,
@@ -255,7 +400,7 @@ def mark_checked(target: str, file_rel: str, sha: str, axioms: list[str], actor:
     info = {"file": file_rel, "sha256": sha, "axioms": axioms, "at": now(), "by": actor,
             "toolchain": (LEAN / "lean-toolchain").read_text().strip(),
             "mathlib_rev": mathlib_rev()}
-    rec["lease"] = None
+    rec.pop("lease", None)
     if neg:
         rec["status"] = "refuted"
         rec["refuted"] = info
@@ -302,10 +447,19 @@ def cmd_summary(a) -> None:
         done = sum(s["status"] in ("checked", "refuted") for s in mine)
         print(f"- {p['id']} [{p.get('status', 'active')}] {p['title']}: {done}/{len(mine)} closed")
         print(f"    mandate: {p['mandate']}")
+    try:
+        leases = read_leases()
+    except DeskError as e:
+        leases = {}
+        print(f"\n(leases unavailable: {e})")
     print("\n## Open steps (frozen)")
     for s in sorted((s for s in steps if s["status"] == "frozen"),
                     key=lambda s: (-s.get("priority", 50), s["id"])):
-        lease = f" LEASED by {s['lease']['holder']}" if lease_live(s) else ""
+        held = live_lease(leases, s["id"])
+        lease = ""
+        if held:
+            lease = f" LEASED by {held['holder']}" + (f" ({held['note']})" if held.get("note")
+                                                      else "")
         print(f"- {s['id']} (p{s.get('priority', 50)}){lease}: {s['title']}"
               f"  [dead ends: {len(s['dead_ends'])}, sketches: {len(s['sketches'])}]")
     print("\n## Awaiting fidelity / approval (proposed)")
@@ -387,10 +541,14 @@ def cmd_approve(a) -> None:
         rec = load(a.id)
         if rec["status"] != "proposed":
             raise DeskError(f"{a.id} is {rec['status']}")
+        who = handle()
+        if who == "local":
+            raise DeskError("set your GitHub handle first: git config recon.handle <handle>")
         rec["human_approved"] = True
         rec["human_approved_sha256"] = rec["statement_sha256"]
+        rec["approved_by"] = who
         save(rec)
-        event("approved", a.id, "human")
+        event("approved", a.id, f"{who}/human")
     print(f"approved {a.id} (statement sha {rec['statement_sha256'][:12]})")
 
 
@@ -426,7 +584,8 @@ def cmd_freeze(a) -> None:
 
 
 def cmd_next(a) -> None:
-    cands = [s for s in all_steps() if s["status"] == "frozen" and not lease_live(s)
+    leases = read_leases()
+    cands = [s for s in all_steps() if s["status"] == "frozen" and not live_lease(leases, s["id"])
              and (not a.program or s["program"] == a.program)]
     cands.sort(key=lambda s: (-s.get("priority", 50), len(s["dead_ends"]), s["id"]))
     if not cands:
@@ -439,38 +598,43 @@ def cmd_next(a) -> None:
 
 
 def cmd_lease(a) -> None:
-    with locked():
-        rec = load(a.id)
-        if rec["status"] != "frozen":
-            raise DeskError(f"{a.id} is {rec['status']}, not frozen")
-        if lease_live(rec) and rec["lease"]["holder"] != a.holder:
-            raise DeskError(f"{a.id} is leased by {rec['lease']['holder']} until "
-                            f"{rec['lease']['expires']}")
-        exp = _dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(minutes=a.minutes)
-        rec["lease"] = {"holder": a.holder, "since": now(),
-                        "expires": exp.replace(microsecond=0).isoformat()}
-        save(rec)
-        event("leased", a.id, a.holder, minutes=a.minutes)
-    print(f"leased {a.id} to {a.holder} until {rec['lease']['expires']}")
+    rec = load(a.id)
+    if rec["status"] != "frozen":
+        raise DeskError(f"{a.id} is {rec['status']}, not frozen")
+    info = acquire(a.id, a.holder, a.minutes, a.note)
+    event("leased", a.id, info["holder"], minutes=a.minutes, note=a.note)
+    print(f"leased {a.id} to {info['holder']} until {info['expires']}")
 
 
 def cmd_beat(a) -> None:
-    a.minutes = a.minutes or 120
-    cmd_lease(a)
+    info = renew(a.id, a.holder, a.minutes, a.note)
+    # heartbeats go to the live view only; the ledger keeps leases, releases and verdicts
+    event("beat", a.id, info["holder"], ledger=False, note=a.note, expires=info["expires"])
+    print(f"renewed {a.id} for {info['holder']} until {info['expires']}")
 
 
 def cmd_release(a) -> None:
+    holder = qualify(a.holder)
+    drop(a.id, holder)
     with locked():
         rec = load(a.id)
-        if rec.get("lease") and rec["lease"]["holder"] != a.holder and lease_live(rec):
-            raise DeskError(f"lease is held by {rec['lease']['holder']}")
-        rec["lease"] = None
+        rec.pop("lease", None)
         if a.note:
-            rec["dead_ends"].append({"approach": a.note, "reason": a.reason, "by": a.holder,
+            rec["dead_ends"].append({"approach": a.note, "reason": a.reason, "by": holder,
                                      "at": now()})
         save(rec)
-        event("released", a.id, a.holder, reason=a.reason, note=a.note)
+        event("released", a.id, holder, reason=a.reason, note=a.note)
     print(f"released {a.id} ({a.reason})")
+
+
+def cmd_leases(a) -> None:
+    leases = read_leases()
+    if not leases:
+        print("no leases")
+    for sid, info in sorted(leases.items()):
+        state = "expired" if _expired(info) else "live"
+        print(f"{sid}\t{state}\t{info['holder']}\tuntil {info['expires']}\t"
+              f"{info.get('note', '')}")
 
 
 def cmd_dead_end(a) -> None:
@@ -542,7 +706,10 @@ def main(argv: list[str] | None = None) -> int:
 
     for name, fn in (("lease", cmd_lease), ("beat", cmd_beat)):
         p = sub.add_parser(name); p.add_argument("id"); p.add_argument("--holder", required=True)
-        p.add_argument("--minutes", type=int, default=120); p.set_defaults(fn=fn)
+        p.add_argument("--minutes", type=int, default=120)
+        p.add_argument("--note", help="what the holder is doing now (shown live)")
+        p.set_defaults(fn=fn)
+    sub.add_parser("leases").set_defaults(fn=cmd_leases)
 
     p = sub.add_parser("release"); p.add_argument("id"); p.add_argument("--holder", required=True)
     p.add_argument("--reason", choices=RELEASE_REASONS, required=True); p.add_argument("--note")
