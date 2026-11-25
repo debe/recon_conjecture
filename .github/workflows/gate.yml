@@ -51,7 +51,12 @@ jobs:
           if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
             BASE=$(git rev-list --max-parents=0 HEAD | tail -1)
           fi
-          python3 tools/ci_policy.py --base "$BASE" --head HEAD --labels "${LABELS:-[]}"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            python3 tools/ci_policy.py --base "$BASE" --head HEAD --labels "${LABELS:-[]}"
+          else
+            # push to protected main: only merged PRs land here, and they passed the label rule
+            python3 tools/ci_policy.py --base "$BASE" --head HEAD
+          fi
 
       - name: Audit (rebuild and re-verify every checked result)
         run: python3 tools/audit.py --clean

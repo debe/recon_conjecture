@@ -68,7 +68,9 @@ def maintainers(rev: str) -> set[str]:
     return {ln.strip() for ln in text.splitlines() if ln.strip() and not ln.startswith("#")}
 
 
-def check(base: str, head: str, labels: set[str]) -> list[str]:
+def check(base: str, head: str, labels: set[str] | None) -> list[str]:
+    """labels=None: a push to protected main. Every such push is a merged PR that already
+    passed the label rule, and a push event carries no labels, so that rule is skipped."""
     problems: list[str] = []
     diff = changes(base, head)
 
@@ -79,7 +81,7 @@ def check(base: str, head: str, labels: set[str]) -> list[str]:
         if path.startswith("ledger/steps/") and status == "D":
             problems.append(f"{path}: step records are never deleted")
     touched_trusted = sorted({p for _, p in diff if p.startswith(TRUSTED)})
-    if touched_trusted and TRUSTED_LABEL not in labels:
+    if touched_trusted and labels is not None and TRUSTED_LABEL not in labels:
         problems.append(f"trusted files changed without the `{TRUSTED_LABEL}` label: "
                         + ", ".join(touched_trusted))
 
@@ -119,9 +121,10 @@ def main(argv: list[str] | None = None) -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--base", required=True)
     ap.add_argument("--head", default="HEAD")
-    ap.add_argument("--labels", default="[]", help="JSON list of PR label names")
+    ap.add_argument("--labels", default=None,
+                    help="JSON list of PR label names; omit for a push to protected main")
     a = ap.parse_args(argv)
-    labels = set(json.loads(a.labels or "[]"))
+    labels = None if a.labels is None else set(json.loads(a.labels or "[]"))
     problems = check(a.base, a.head, labels)
     if problems:
         print("POLICY FAILED")
