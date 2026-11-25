@@ -53,3 +53,37 @@
 {"ts": "2026-11-25T12:44:00+00:00", "kind": "checked", "step": "kelly_edge_count", "actor": "debe/b1", "file": "lean/Recon/Checked/L_kelly_edge_count.lean"}
 {"ts": "2026-11-25T12:44:19+00:00", "kind": "verdict", "step": "kelly_edge_sum", "actor": "debe/b1", "target": "kelly_edge_sum", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_kelly_edge_sum.lean"}
 {"ts": "2026-11-25T12:44:19+00:00", "kind": "checked", "step": "kelly_edge_sum", "actor": "debe/b1", "file": "lean/Recon/Checked/L_kelly_edge_sum.lean"}
+{"ts": "2026-11-25T13:21:06+00:00", "kind": "proposed", "step": "found_hypomorphic_compl", "actor": "debe/main", "title": "Complements of hypomorphic graphs are hypomorphic"}
+{"ts": "2026-11-25T13:21:29+00:00", "kind": "proposed", "step": "found_reconstructible_compl", "actor": "debe/main", "title": "A graph is reconstructible iff its complement is"}
+{"ts": "2026-11-25T13:21:53+00:00", "kind": "proposed", "step": "kelly_degree_sequence", "actor": "debe/main", "title": "The degree sequence is recognizable"}
+{"ts": "2026-11-25T13:22:14+00:00", "kind": "proposed", "step": "discon_isolated_vertex", "actor": "debe/main", "title": "Graphs with an isolated vertex are reconstructible"}
+{"ts": "2026-11-25T13:22:55+00:00", "kind": "fidelity", "step": "kelly_degree_sequence", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T13:23:11+00:00", "kind": "fidelity", "step": "discon_isolated_vertex", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T13:23:16+00:00", "kind": "fidelity", "step": "found_reconstructible_compl", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T13:23:22+00:00", "kind": "fidelity", "step": "discon_isolated_vertex", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T13:23:27+00:00", "kind": "fidelity", "step": "found_hypomorphic_compl", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T13:25:51+00:00", "kind": "fidelity", "step": "kelly_degree_sequence", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T13:28:31+00:00", "kind": "fidelity", "step": "found_reconstructible_compl", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T13:42:41+00:00", "kind": "fidelity", "step": "found_hypomorphic_compl", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T13:44:53+00:00", "kind": "approved", "step": "found_hypomorphic_compl", "actor": "debe/human"}
+{"ts": "2026-11-25T13:44:53+00:00", "kind": "approved", "step": "found_reconstructible_compl", "actor": "debe/human"}
+{"ts": "2026-11-25T13:44:53+00:00", "kind": "approved", "step": "kelly_degree_sequence", "actor": "debe/human"}
+{"ts": "2026-11-25T13:44:53+00:00", "kind": "approved", "step": "discon_isolated_vertex", "actor": "debe/human"}
+{"ts": "2026-11-25T13:44:58+00:00", "kind": "frozen", "step": "found_hypomorphic_compl", "actor": "debe/desk"}
+{"ts": "2026-11-25T13:44:59+00:00", "kind": "frozen", "step": "found_reconstructible_compl", "actor": "debe/desk"}
+{"ts": "2026-11-25T13:44:59+00:00", "kind": "frozen", "step": "kelly_degree_sequence", "actor": "debe/desk"}
+{"ts": "2026-11-25T13:44:59+00:00", "kind": "frozen", "step": "discon_isolated_vertex", "actor": "debe/desk"}
+{"ts": "2026-11-25T13:45:59+00:00", "kind": "verdict", "step": "kelly_degree_sequence", "actor": "debe/b1", "target": "kelly_degree_sequence", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_kelly_degree_sequence.lean"}
+{"ts": "2026-11-25T13:45:59+00:00", "kind": "checked", "step": "kelly_degree_sequence", "actor": "debe/b1", "file": "lean/Recon/Checked/L_kelly_degree_sequence.lean"}
+{"ts": "2026-11-25T13:46:10+00:00", "kind": "verdict", "step": "found_reconstructible_compl", "actor": "debe/b1", "target": "found_reconstructible_compl", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_reconstructible_compl.lean"}
+{"ts": "2026-11-25T13:46:10+00:00", "kind": "checked", "step": "found_reconstructible_compl", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_reconstructible_compl.lean"}
+{"ts": "2026-11-25T13:46:22+00:00", "kind": "verdict", "step": "found_hypomorphic_compl", "actor": "debe/b1", "target": "found_hypomorphic_compl", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_hypomorphic_compl.lean"}
+{"ts": "2026-11-25T13:46:22+00:00", "kind": "checked", "step": "found_hypomorphic_compl", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_hypomorphic_compl.lean"}
+{"ts": "2026-11-25T13:50:04+00:00", "kind": "program_added", "step": null, "actor": "debe/human", "program": "conj"}
+{"ts": "2026-11-25T13:50:19+00:00", "kind": "proposed", "step": "conj_kelly_ulam", "actor": "debe/main", "title": "The reconstruction conjecture"}
+{"ts": "2026-11-25T13:50:53+00:00", "kind": "fidelity", "step": "conj_kelly_ulam", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T13:51:43+00:00", "kind": "sketch", "step": "discon_isolated_vertex", "actor": "debe/t1", "path": "notes/sketches/discon_isolated_vertex/t1.md"}
+{"ts": "2026-11-25T13:51:43+00:00", "kind": "sketch", "step": "discon_isolated_vertex", "actor": "debe/t2", "path": "notes/sketches/discon_isolated_vertex/t2.md"}
+{"ts": "2026-11-25T13:52:25+00:00", "kind": "verdict", "step": "discon_isolated_vertex", "actor": "debe/b1", "target": "discon_isolated_vertex", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_discon_isolated_vertex.lean"}
+{"ts": "2026-11-25T13:52:25+00:00", "kind": "checked", "step": "discon_isolated_vertex", "actor": "debe/b1", "file": "lean/Recon/Checked/L_discon_isolated_vertex.lean"}
+{"ts": "2026-11-25T13:52:27+00:00", "kind": "fidelity", "step": "conj_kelly_ulam", "actor": "debe/fid-testing", "verdict": "pass"}

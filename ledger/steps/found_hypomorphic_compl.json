@@ -1,0 +1,54 @@
+{
+  "id": "found_hypomorphic_compl",
+  "program": "found",
+  "title": "Complements of hypomorphic graphs are hypomorphic",
+  "statement_en": "For every n and all graphs G, H on Fin n: if G and H are hypomorphic, then their complements are hypomorphic. (The card of the complement at x is the complement of the card at x; source: structural_reductions.md C1, standard, e.g. Bondy 1991.)",
+  "statement_lean": "∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → Recon.Hypomorphic Gᶜ Hᶜ",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_found_hypomorphic_compl.lean",
+  "statement_sha256": "182a674a859148d016383146ac979f52d5a08543edfc86f975c7d12d8212cb22",
+  "status": "checked",
+  "author": "debe/main",
+  "created": "2026-11-25T13:21:06+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_compl (lens: back-translation, reviewer fid-backtranslate)\n\n## Independent English reading of the Lean (written before reading statement_en)\n\nLean: `∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → Recon.Hypomorphic Gᶜ Hᶜ`\n\nExpanding `Recon.Hypomorphic` and `Recon.card` from the trusted Basic.lean:\n\nFor every natural number n (n = 0, 1, 2 included; there is no lower bound) and every pair of\nsimple graphs G, H on vertex set Fin n: if there exists a bijection σ : Fin n ≃ Fin n such\nthat for every vertex x the induced subgraph G[V ∖ {x}] is isomorphic to H[V ∖ {σ x}], then\nthere exists a bijection τ : Fin n ≃ Fin n such that for every vertex x the induced\nsubgraph Gᶜ[V ∖ {x}] is isomorphic to Hᶜ[V ∖ {τ x}]. Here Gᶜ is the Mathlib complement\ngraph: `Gᶜ.Adj a b ↔ a ≠ b ∧ ¬ G.Adj a b` (the ordinary loopless complement).\n\nIn words: if G and H have the same deck, then so do their complements.\n\nMechanical confirmation: in a scratch file I typechecked, by `Iff.rfl`, that\n`S_found_hypomorphic_compl` is definitionally the fully unfolded statement above\n(`∃ σ, ∀ x, Nonempty (G.induce {x}ᶜ ≃g H.induce {σ x}ᶜ)` → the same with `Gᶜ` and `Hᶜ`).\nI also typechecked `SimpleGraph.compl_adj` to confirm that `ᶜ` resolves to the SimpleGraph\ncomplement.\n\n## Clause-by-clause comparison with statement_en\n\n| statement_en | Lean | Match |\n|---|---|---|\n| \"For every n\" | `∀ n : ℕ` with no hypothesis on n | yes. English sets no bound, and the claim is true for all n, so no n ≥ 3 is needed. |\n| \"all graphs G, H on Fin n\" | `∀ G H : SimpleGraph (Fin n)` | yes. Both share one vertex type, `Fin n`, as the English says. |\n| \"if G and H are hypomorphic\" | `Recon.Hypomorphic G H →` | yes. This is the repo's Bondy–Hemminger same-deck definition (a vertex bijection with card-wise isomorphisms), which is equivalent to equality of the multisets of card isomorphism classes. |\n| \"then their complements are hypomorphic\" | `Recon.Hypomorphic Gᶜ Hᶜ` | yes. `ᶜ` is the graph complement. |\n| parenthetical: card of complement = complement of card | none (proof hint) | n/a. It is commentary, not part of the claim. |\n\n## Failure-mode checklist\n\n- Quantifier order and scope: n, G and H are universal, and the hypothesis scopes only the\n  conclusion. The σ inside the hypothesis and the τ inside the conclusion are independent\n  existentials, which is correct. (The proof can take τ = σ, because\n  `(Gᶜ).induce s = (G.induce s)ᶜ` and an isomorphism of graphs is also an isomorphism of\n  their complements.)\n- Missing or extra hypothesis: none. The fact holds for every n, so leaving out `3 ≤ n` is\n  correct and makes the statement stronger, not weaker.\n- Fin n against arbitrary types: the English explicitly says Fin n, so the restriction matches.\n- ≤ against <, off-by-one: not applicable.\n- Vacuity: the hypothesis is satisfiable (`anchor_hypomorphic_refl` gives `Hypomorphic G G`).\n- Triviality: the conclusion is not trivially true. `anchor_three_vertices_not_hypomorphic`\n  shows that Hypomorphic is a real restriction at n = 3.\n- Notion of iso, card and deck: these are the trusted repo definitions. The card is an\n  induced subgraph on `{x}ᶜ`, and `≃g` is a graph isomorphism.\n- Nonempty against an explicit structure: Prop-level `Nonempty`, the same as in the definition.\n- Coercions: `{x}ᶜ` is a set complement coerced to a subtype, the same in the hypothesis and\n  the conclusion. `Gᶜ` and `Hᶜ` are graph complements. These two `ᶜ` are distinct notions,\n  and each is used correctly.\n\n## Verdict: PASS\n\nThe Lean says exactly what the English says: for graphs on Fin n, with no bound on n, the\nhypomorphism of G and H implies the hypomorphism of Gᶜ and Hᶜ. This is a standard fact\n(Kelly; Bondy 1991).\n",
+      "sha256": "182a674a859148d016383146ac979f52d5a08543edfc86f975c7d12d8212cb22",
+      "at": "2026-11-25T13:23:27+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_compl (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\n\nLean: `∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → Recon.Hypomorphic Gᶜ Hᶜ`\n\nEnglish: for every n and all graphs G, H on Fin n, if G and H are hypomorphic then their\ncomplements are hypomorphic.\n\n`Recon.Hypomorphic G H := ∃ σ : V ≃ W, ∀ x, Nonempty (card G x ≃g card H (σ x))`, with\n`card G x := G.induce {x}ᶜ`. `Gᶜ` is Mathlib's complement: `Gᶜ.Adj x y ↔ x ≠ y ∧ ¬ G.Adj x y`.\n\n## Predicates encoded\n\n- **Lean reading** (`lean_pred`): literal. `lean_hyp` searches every permutation σ of\n  `range(n)` and checks, for each x, that the card of G at x (induced subgraph on the other\n  vertices, labels kept) is isomorphic to the card of H at σ x. The complement is built\n  literally as the Mathlib complement (`x ≠ y ∧ ¬ G.Adj x y`). Cards of the complement are\n  computed as induced subgraphs *of the complement*, so the card-complement identity is not\n  assumed. `lean_pred(G,H) = ¬lean_hyp(G,H) ∨ lean_hyp(Gᶜ,Hᶜ)`.\n- **English reading** (`en_pred`): deck as a multiset of canonical card forms\n  (`small_graphs.hypomorphic`, i.e. `deck_key` equality), and complements from\n  `networkx.complement`. `en_pred(G,H) = ¬same_deck(G,H) ∨ same_deck(Gᶜ,Hᶜ)`.\n\nScripts (scratch, not part of the repo):\n`/tmp/claude-1000/-home-db-repositories-recon-conjecture/e6d4dcbf-445f-4ae9-8905-c3fde960a39c/scratchpad/fid_compl.py`\nand `fid_labeled.py` in the same directory.\n\n## Results\n\nExhaustive over all ordered pairs of isomorphism classes (networkx atlas), n = 0..6:\n\n| n | graphs | pairs | hyp pairs | non-iso hyp pairs | conclusion-false pairs | Lean vs English diffs | lean_hyp vs deck diffs | Lean pred false |\n|---|---|---|---|---|---|---|---|---|\n| 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |\n| 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |\n| 2 | 2 | 4 | 4 | 2 | 0 | 0 | 0 | 0 |\n| 3 | 4 | 16 | 4 | 0 | 12 | 0 | 0 | 0 |\n| 4 | 11 | 121 | 11 | 0 | 110 | 0 | 0 | 0 |\n| 5 | 34 | 1156 | 34 | 0 | 1122 | 0 | 0 | 0 |\n| 6 | 156 | 24336 | 156 | 0 | 24180 | 0 | 0 | 0 |\n\nBecause the Lean statement quantifies over *labeled* graphs on `Fin n`, I also ran all labeled\ngraphs for n = 0..4 (1, 1, 2, 8, 64 graphs; all ordered pairs): 0 Lean/English differences, 0\npairs where the Lean predicate is false, and `card Gᶜ x` equals `(card G x)ᶜ` edge for edge in\nevery case.\n\n## Failure-mode checklist\n\n- **Vacuity:** the hypothesis holds. G = H always satisfies it (reflexivity anchor), and n = 2\n  gives a non-isomorphic hypomorphic pair (K₂, 2K₁). Their complements (2K₁, K₂) are again\n  hypomorphic, so the n = 2 edge case is consistent with the statement.\n- **Trivially true conclusion?** No: `Hypomorphic Gᶜ Hᶜ` is false for most pairs (for example\n  24180 of 24336 pairs at n = 6). The implication carries content through the hypothesis.\n- **Missing n ≥ 3:** the English says \"for every n\", and the Lean has no bound either. This is\n  correct: the claim holds for every n, including n = 0, 1, 2, so no bound is needed. Leaving it\n  out makes the statement stronger, not weaker, and it is still true on every graph tested.\n- **Fin n vs arbitrary types:** both readings use `Fin n` with the same n for G and H. That\n  matches the English.\n- **Notion of deck:** Lean uses the bijection-of-cards definition from `Basic.lean`. The\n  `lean_hyp vs deck` column shows it agrees with multiset deck equality on every pair tested.\n- **Complement:** Mathlib's `ᶜ` on `SimpleGraph` is the loopless complement, which matches the\n  graph-theoretic complement. The test builds it literally.\n- **Quantifiers and coercions:** there is no quantifier alternation beyond ∀ ∀ ∀ → . There are\n  no coercions, and both Hypomorphic instances live at the same type `Fin n`.\n\nNo mismatch found.\n",
+      "sha256": "182a674a859148d016383146ac979f52d5a08543edfc86f975c7d12d8212cb22",
+      "at": "2026-11-25T13:42:41+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "found_hypomorphic_compl_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_found_hypomorphic_compl.lean",
+    "sha256": "f76965e473f2d2bec20f5bb8c4bee68c276ba6fd6209162a1b53717287c4ab12",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T13:46:22+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "182a674a859148d016383146ac979f52d5a08543edfc86f975c7d12d8212cb22",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T13:44:58+00:00"
+}
