@@ -72,6 +72,8 @@ def test_trusted_change_needs_label(repo):
     commit(r, "gate")
     assert any("trusted-change" in p for p in check(r, base))
     assert check(r, base, ["trusted-change"]) == []
+    # a push to protected main carries no labels; its PR already passed the rule
+    assert ci_policy.check(base, "HEAD", None) == []
 
 
 def test_frozen_root_needs_maintainer_approval(repo):
