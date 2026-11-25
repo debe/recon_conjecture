@@ -194,6 +194,20 @@ def ship(gh: GitHub, pr: dict, merge: bool) -> int:
     raise ShipError(f"main kept moving: gave up after {MAX_UPDATES} updates of PR #{number}")
 
 
+def sync_main(branch: str) -> None:
+    """After a merge: back to an up-to-date main. Best effort, since the merge already counts; in
+    a worktree, main may be checked out elsewhere, so only the remote-tracking ref is updated."""
+    try:
+        git("switch", "-q", "main")
+        git("pull", "-q", "--ff-only")
+        git("branch", "-D", branch, check=False)
+        print("main is up to date")
+    except ShipError:
+        git("fetch", "-q", "origin", "main", check=False)
+        print(f"merged; main is checked out elsewhere, so this checkout stays on {branch} "
+              "(origin/main is fetched)")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("title", nargs="?", default="", help="commit message and PR title")
@@ -201,6 +215,7 @@ def main() -> int:
     ap.add_argument("--no-merge", action="store_true", help="stop once CI is green")
     ap.add_argument("--all", action="store_true", help="commit every change, not only the fleet's outputs")
     a = ap.parse_args()
+    sys.stdout.reconfigure(line_buffering=True)   # progress and errors in order, even when piped
     try:
         gh = GitHub(repo_slug(), handle())
         commit(a.title, a.all)
@@ -210,10 +225,7 @@ def main() -> int:
         git("push", "-q", "-u", "origin", "HEAD")
         rc = ship(gh, open_pr(gh, branch, a.title, a.body), merge=not a.no_merge)
         if rc == 0 and not a.no_merge:
-            git("switch", "-q", "main")
-            git("pull", "-q", "--ff-only")
-            git("branch", "-D", branch, check=False)
-            print("main is up to date")
+            sync_main(branch)
         return rc
     except ShipError as e:
         print(f"ship: {e}", file=sys.stderr)
