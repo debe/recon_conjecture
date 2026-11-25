@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconstruction Fleet</title>
+<meta name="description" content="Live map of a Lean-checked proof fleet working on the graph reconstruction conjecture">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>Reconstruction Fleet</h1>
+    <p class="sub">Kelly–Ulam conjecture · every result is checked by Lean in CI · this page only shows it</p>
+  </div>
+  <div class="status">
+    <span id="conn" class="dot" title="relay connection"></span>
+    <span id="conn-label">connecting…</span>
+    <span class="sep">·</span>
+    <span id="counts"></span>
+  </div>
+</header>
+<main>
+  <section class="map" aria-label="Map of programs and steps">
+    <canvas id="map"></canvas>
+    <div class="legend" id="legend"></div>
+    <div class="hint">drag to pan · wheel or pinch to zoom · click a step</div>
+  </section>
+  <aside>
+    <section class="panel">
+      <h2>On the desk now</h2>
+      <ul id="presence" class="presence"></ul>
+    </section>
+    <section class="panel">
+      <h2>CI verdicts</h2>
+      <ul id="ci" class="list"></ul>
+    </section>
+    <section class="panel grow">
+      <h2>Events</h2>
+      <ul id="ticker" class="list ticker"></ul>
+    </section>
+  </aside>
+</main>
+<section id="drawer" class="drawer" hidden>
+  <button id="drawer-close" class="close" aria-label="Close">×</button>
+  <div id="drawer-body"></div>
+</section>
+<footer>
+  <span id="snapshot-info"></span>
+  <span class="sep">·</span>
+  <a href="https://github.com/debe/recon_conjecture">source and ledger</a>
+  <span class="sep">·</span>
+  <span>graveyard below the map: released steps and dead ends</span>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

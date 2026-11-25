@@ -1,0 +1,83 @@
+# The authoritative verdict. A result counts once this job is green on main.
+# audit.py --clean re-verifies every checked file from scratch with the pinned toolchain;
+# ci_policy.py checks the rules on the diff that Lean cannot see.
+name: gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install elan (toolchain from lean/lean-toolchain)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Restore Mathlib packages
+        uses: actions/cache@v4
+        with:
+          path: lean/.lake/packages
+          key: lake-packages-${{ hashFiles('lean/lake-manifest.json', 'lean/lean-toolchain') }}
+
+      - name: Fetch Mathlib build cache
+        working-directory: lean
+        run: |
+          lake exe cache get
+          df -h / | tail -1
+
+      - name: Policy
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            BASE=$(git rev-list --max-parents=0 HEAD | tail -1)
+          fi
+          python3 tools/ci_policy.py --base "$BASE" --head HEAD --labels "${LABELS:-[]}"
+
+      - name: Audit (rebuild and re-verify every checked result)
+        run: python3 tools/audit.py --clean
+
+      - name: Tool tests (only when tools/ changed)
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if git diff --quiet "${BASE:-HEAD~1}" HEAD -- tools/ 2>/dev/null; then
+            echo "tools/ unchanged; skipping"
+          else
+            python3 -m pip install --quiet pytest
+            git config --global user.name ci && git config --global user.email ci@invalid
+            python3 -m pytest tools/tests -q
+          fi
+
+      - name: Tell the live view (CI verdict)
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          RECON_LIVE_TOKEN: ${{ secrets.RECON_LIVE_TOKEN }}
+          RESULT: ${{ job.status }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          [ -n "$RECON_LIVE_TOKEN" ] || exit 0
+          python3 tools/live.py emit ci_verdict --actor ci \
+            --data "{\"result\": \"$RESULT\", \"pr\": $PR, \"sha\": \"$SHA\", \"url\": \"$URL\"}"
