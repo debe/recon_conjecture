@@ -1,0 +1,3 @@
+# The event log is append-only: parallel branches each append lines, and a union merge
+# keeps both sides' lines without conflicts. ci_policy.py checks no line is ever removed.
+ledger/events.jsonl merge=union

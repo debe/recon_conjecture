@@ -1,0 +1,39 @@
+[Unit]
+Description=recon-relay: live-event relay for the recon_conjecture fleet (not authoritative)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/recon-relay/recon-relay
+Restart=always
+RestartSec=2
+
+# Publisher token hashes (principal sha256hex per line) live in this root-owned 0600 file;
+# systemd hands it to the service, so the unit itself carries no secret.
+LoadCredential=tokens:/etc/recon-relay/tokens
+
+Environment=RECON_RELAY_BIND=127.0.0.1:8090
+Environment=RECON_RELAY_ORIGIN=https://debe.github.io
+
+# The service needs its own state directory and one listening socket, nothing else.
+DynamicUser=yes
+StateDirectory=recon-relay
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+MemoryMax=128M
+TasksMax=16
+
+[Install]
+WantedBy=multi-user.target

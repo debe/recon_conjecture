@@ -1,0 +1,44 @@
+# Publish the canvas page with a fresh ledger snapshot on every push to main.
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Snapshot the ledger (steps, programs, leases, event tail)
+        env:
+          RECON_LIVE: "off"
+        run: python3 tools/snapshot.py --out site/state.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Tell the live view (merged)
+        if: success()
+        continue-on-error: true
+        env:
+          RECON_LIVE_TOKEN: ${{ secrets.RECON_LIVE_TOKEN }}
+        run: |
+          [ -n "$RECON_LIVE_TOKEN" ] || exit 0
+          python3 tools/live.py emit merged --actor ci \
+            --data "{\"sha\": \"$GITHUB_SHA\", \"url\": \"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA\"}"
