@@ -1,0 +1,38 @@
+{
+  "id": "conj_kelly_ulam__connected_dominating_or_diam2__unique_copy_gluing",
+  "program": "conj",
+  "title": "Two-card gluing at a unique-copy pair with factorizing automorphism group (t4 section 6, anchor A1)",
+  "statement_en": "Every graph G on at least 3 vertices with a pair u != v such that the two-deleted subgraph F = G - {u, v} occurs as an induced subgraph of G only on its own vertex set, and every automorphism g of F factors as g = k h^{-1} with h fixing N(v) on F setwise and k fixing N(u) on F setwise (Aut(F) = Stab(N(u)) Stab(N(v))), is reconstructible. (Sketch t4 section 6, extending t2 lemma C; no source found, attribution UNVERIFIED.)",
+  "statement_lean": "Recon.ClassReconstructible (fun n G => (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1)))",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__unique_copy_gluing.lean",
+  "statement_sha256": "1d2de94b261ea9f1b15ac7bc0c34cf6ab229af0fa51507f5c0c0ced752e70cab",
+  "status": "checked",
+  "author": "reducer",
+  "created": "2026-11-25T18:56:44+00:00",
+  "parent": "conj_kelly_ulam__connected_dominating_or_diam2",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__unique_copy_gluing_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__unique_copy_gluing.lean",
+    "sha256": "73f8d88625cfbe59adf4eb6a5f1e8eff304adcc1d5b7cdb6d9c75f9b57962f35",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T19:01:40+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-25T18:56:44+00:00"
+}

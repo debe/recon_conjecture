@@ -1,0 +1,38 @@
+{
+  "id": "conj_kelly_ulam__connected_dominating_or_diam2__pure_degree_class",
+  "program": "conj",
+  "title": "A pure degree class makes a graph reconstructible (t4 Lemma P)",
+  "statement_en": "Every graph G on at least 3 vertices that has a vertex u whose degree class is pure is reconstructible: pure means that for any two ordered pairs of distinct vertices (x, y), (x', y') with deg x = deg x' = deg u and G - x - y isomorphic to G - x' - y', x ~ y iff x' ~ y'. (Sketch t4 section 4; no source found, attribution UNVERIFIED.)",
+  "statement_lean": "Recon.ClassReconstructible (fun n G => (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')))",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__pure_degree_class.lean",
+  "statement_sha256": "28c6d544d44ed6904cb2cd1605262884b57ce5efb99424b2715383110c16be3c",
+  "status": "checked",
+  "author": "reducer",
+  "created": "2026-11-25T18:56:44+00:00",
+  "parent": "conj_kelly_ulam__connected_dominating_or_diam2",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__pure_degree_class_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__pure_degree_class.lean",
+    "sha256": "00fd656e0e2b0660239a6de7d019841ce8f23eaba89ad336a9872ab52ab6696e",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T19:03:56+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-25T18:56:44+00:00"
+}
