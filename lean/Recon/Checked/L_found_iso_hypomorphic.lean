@@ -1,7 +1,7 @@
 import Mathlib
-import Recon.Statements.S_found_001
+import Recon.Statements.S_found_iso_hypomorphic
 
-namespace Recon.Checked.L_found_001
+namespace Recon.Checked.L_found_iso_hypomorphic
 
 /-- Restrict a graph isomorphism to the cards at `x` and `f x`. -/
 def cardIso {n : ℕ} {G H : SimpleGraph (Fin n)} (f : G ≃g H) (x : Fin n) :
@@ -14,8 +14,8 @@ def cardIso {n : ℕ} {G H : SimpleGraph (Fin n)} (f : G ≃g H) (x : Fin n) :
     simp only [Recon.card, SimpleGraph.comap_adj, SimpleGraph.induce, Function.Embedding.coe_subtype]
     exact f.map_adj_iff
 
-end Recon.Checked.L_found_001
+end Recon.Checked.L_found_iso_hypomorphic
 
-theorem Recon.Checked.L_found_001 : Recon.Statements.S_found_001 := by
+theorem Recon.Checked.L_found_iso_hypomorphic : Recon.Statements.S_found_iso_hypomorphic := by
   intro n G H ⟨f⟩
-  exact ⟨f.toEquiv, fun x => ⟨Recon.Checked.L_found_001.cardIso f x⟩⟩
+  exact ⟨f.toEquiv, fun x => ⟨Recon.Checked.L_found_iso_hypomorphic.cardIso f x⟩⟩

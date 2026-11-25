@@ -347,13 +347,14 @@ def cmd_check(target: str, file: str, actor: str) -> list[str]:
 
 def cmd_check_reduction(bundle_path: str, actor: str, dry: bool = False) -> list[str]:
     """Bundle JSON:
-    {"parent": "found_003", "by": "label",
-     "children": [{"title": "...", "statement_en": "...", "statement_lean": "..."}, ...],
-     "proof_file": "lean/Recon/Scratch/found_003/r1.lean"}
-    The proof file proves `theorem Recon.Checked.R_<parent>_r<k> :
-        Recon.Statements.S_<child1> → ... → Recon.Statements.S_<parent>`.
-    Children ids are assigned as <parent>_r<k><a|b|c|d>; k is the next free reduction number,
-    and the bundle must use exactly those names (run `gate.py next-reduction <parent>`).
+    {"parent": "kelly_degree_sequence", "by": "label",
+     "children": [{"slug": "edge_count", "title": "...", "statement_en": "...",
+                   "statement_lean": "..."}, ...],
+     "proof_file": "lean/Recon/Scratch/kelly_degree_sequence/r1.lean"}
+    Each child's id is <parent>__<slug>, its slug a snake_case name for what it claims. The
+    proof file proves `theorem Recon.Checked.R_<parent>_r<k> :
+        Recon.Statements.S_<child1> → ... → Recon.Statements.S_<parent>`, where k numbers the
+    parent's reduction attempts (run `gate.py next-reduction <parent>`).
     """
     b = json.loads(Path(bundle_path).read_text())
     parent = b["parent"]
@@ -365,7 +366,15 @@ def cmd_check_reduction(bundle_path: str, actor: str, dry: bool = False) -> list
         kids = b["children"]
         if not 2 <= len(kids) <= 4:
             raise Rejected("a reduction has 2 to 4 children")
-        ids = [f"{parent}_r{k}{'abcd'[i]}" for i in range(len(kids))]
+        try:
+            ids = [desk.child_id(parent, c.get("slug", "")) for c in kids]
+        except desk.DeskError as e:
+            raise Rejected(str(e))
+        if len(set(ids)) != len(ids):
+            raise Rejected("two children share a slug")
+        taken = [i for i in ids if desk.step_path(i).exists()]
+        if taken:
+            raise Rejected(f"step ids already exist: {', '.join(taken)}; pick other slugs")
         bodies = [c["statement_lean"].strip() for c in kids]
         if len(set(bodies)) != len(bodies):
             raise Rejected("duplicate children")
@@ -552,12 +561,14 @@ def main(argv: list[str]) -> int:
             rec = desk.load(a.parent)
             k = len(rec.get("reductions", [])) + 1
             print(json.dumps({"theorem": f"Recon.Checked.R_{a.parent}_r{k}",
-                              "children": [f"{a.parent}_r{k}{x}" for x in "abcd"],
-                              "type": "Recon.Statements.S_<child a> → ... → "
+                              "child_id": f"{a.parent}__<slug>",
+                              "slug": "snake_case name for what the child claims, starting "
+                                      "with a letter; set it as \"slug\" on each bundle child",
+                              "type": "Recon.Statements.S_<child 1> → ... → "
                                       f"Recon.Statements.S_{a.parent}",
                               "imports": [desk.statement_module(a.parent),
-                                          *(f"Recon.Statements.S_{a.parent}_r{k}{x}"
-                                            for x in "abcd")]}, indent=2))
+                                          f"Recon.Statements.S_{a.parent}__<slug> per child"]},
+                             indent=2))
             return 0
         if a.cmd == "assemble":
             with desk.locked():

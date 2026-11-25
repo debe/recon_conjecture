@@ -81,8 +81,26 @@ class GitHub:
         return json.loads(out) if out else {}
 
 
-def slug(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:40].rstrip("-") or "work"
+def slug(text: str, limit: int = 40) -> str:
+    """'found_iso_hypomorphic checked: ...' -> 'found-iso-hypomorphic-checked', whole words only."""
+    words = re.sub(r"[^a-z0-9]+", " ", text.lower()).split()
+    out = ""
+    for w in words:
+        if len(out) + len(w) + 1 > limit:
+            break
+        out = f"{out}-{w}" if out else w
+    return out or (words[0][:limit] if words else "work")
+
+
+def free_branch(name: str) -> str:
+    """`name`, or `name-2`, `name-3`, ... if a branch of that name exists here or on origin."""
+    taken = set(git("branch", "--format=%(refname:short)").split())
+    taken |= {ln.split("refs/heads/", 1)[1] for ln in
+              git("ls-remote", "--heads", "origin", check=False).splitlines() if "refs/heads/" in ln}
+    candidate, n = name, 2
+    while candidate in taken:
+        candidate, n = f"{name}-{n}", n + 1
+    return candidate
 
 
 def commit(title: str, everything: bool) -> None:
@@ -98,7 +116,7 @@ def commit(title: str, everything: bool) -> None:
         raise ShipError("there are changes to commit: give a title, e.g. ship.py \"found_002 checked: ...\"")
     branch = git("branch", "--show-current")
     if branch in ("", "main"):
-        branch = f"{handle()}/{slug(title)}-{time.strftime('%m%d%H%M')}"
+        branch = free_branch(f"{handle()}/{slug(title)}")
         git("switch", "-c", branch)
     git("add", *(["-A"] if everything else outputs))
     git("commit", "-q", "-m", title)

@@ -42,40 +42,40 @@ def as_clone(monkeypatch, clone: Path, who: str) -> None:
 def test_one_holder_at_a_time(clones, monkeypatch):
     a, b = clones
     as_clone(monkeypatch, a, "alice")
-    info = desk.acquire("found_001", "b1", 30, "starting")
+    info = desk.acquire("found_iso_hypomorphic", "b1", 30, "starting")
     assert info["holder"] == "alice/b1"
     as_clone(monkeypatch, b, "bob")
     with pytest.raises(desk.DeskError, match="leased by alice/b1"):
-        desk.acquire("found_001", "b1", 30)
+        desk.acquire("found_iso_hypomorphic", "b1", 30)
     with pytest.raises(desk.DeskError, match="does not hold"):
-        desk.renew("found_001", "b1", 30)
+        desk.renew("found_iso_hypomorphic", "b1", 30)
     with pytest.raises(desk.DeskError, match="held by alice/b1"):
-        desk.drop("found_001", "b1")
-    assert desk.live_lease(desk.read_leases(), "found_001")["note"] == "starting"
+        desk.drop("found_iso_hypomorphic", "b1")
+    assert desk.live_lease(desk.read_leases(), "found_iso_hypomorphic")["note"] == "starting"
 
 
 def test_holder_renews_and_releases(clones, monkeypatch):
     a, b = clones
     as_clone(monkeypatch, a, "alice")
-    first = desk.acquire("found_001", "b1", 30)
-    again = desk.renew("found_001", "b1", 60, "precheck 2")
+    first = desk.acquire("found_iso_hypomorphic", "b1", 30)
+    again = desk.renew("found_iso_hypomorphic", "b1", 60, "precheck 2")
     assert again["since"] == first["since"] and again["expires"] > first["expires"]
-    assert desk.drop("found_001", "b1") is True
+    assert desk.drop("found_iso_hypomorphic", "b1") is True
     as_clone(monkeypatch, b, "bob")
     assert desk.read_leases() == {}
-    assert desk.acquire("found_001", "b2", 30)["holder"] == "bob/b2"
+    assert desk.acquire("found_iso_hypomorphic", "b2", 30)["holder"] == "bob/b2"
 
 
 def test_expired_lease_can_be_taken_over(clones, monkeypatch):
     a, b = clones
     as_clone(monkeypatch, a, "alice")
-    desk.acquire("found_001", "b1", 0)          # expires immediately
+    desk.acquire("found_iso_hypomorphic", "b1", 0)          # expires immediately
     as_clone(monkeypatch, b, "bob")
-    assert desk.live_lease(desk.read_leases(), "found_001") is None
-    assert desk.acquire("found_001", "b1", 30)["holder"] == "bob/b1"
+    assert desk.live_lease(desk.read_leases(), "found_iso_hypomorphic") is None
+    assert desk.acquire("found_iso_hypomorphic", "b1", 30)["holder"] == "bob/b1"
     as_clone(monkeypatch, a, "alice")
     with pytest.raises(desk.DeskError, match="does not hold"):
-        desk.renew("found_001", "b1", 30)
+        desk.renew("found_iso_hypomorphic", "b1", 30)
 
 
 def test_race_has_exactly_one_winner(clones, monkeypatch):
@@ -108,10 +108,10 @@ def test_local_mode_without_origin(tmp_path, monkeypatch):
     monkeypatch.setenv("RECON_LIVE", "off")
     sh(tmp_path, "init", "-q", ".")
     as_clone(monkeypatch, tmp_path, "solo")
-    desk.acquire("kelly_001", "b1", 30)
+    desk.acquire("kelly_degree_sequence", "b1", 30)
     with pytest.raises(desk.DeskError):
         monkeypatch.setenv("RECON_HANDLE", "other")
-        desk.acquire("kelly_001", "b1", 30)
+        desk.acquire("kelly_degree_sequence", "b1", 30)
     monkeypatch.setenv("RECON_HANDLE", "solo")
-    assert desk.drop("kelly_001", "b1") is True
+    assert desk.drop("kelly_degree_sequence", "b1") is True
     assert desk.read_leases() == {}

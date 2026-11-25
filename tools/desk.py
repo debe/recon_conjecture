@@ -53,7 +53,13 @@ EVENTS = LEDGER / "events.jsonl"
 PROGRAMS = LEDGER / "programs.json"
 LOCK = LEDGER / ".lock"
 
-STEP_ID = re.compile(r"^[a-z]+_\d{3}(_r\d+[a-d])*$")
+# Step ids say what the step claims, never count: roots are <program>_<slug>
+# (found_iso_hypomorphic), children of a reduction <parent>__<slug>, the negated twin of any
+# step <id>_neg. A slug is snake_case and starts with a letter.
+SLUG = r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*"
+ROOT_ID = re.compile(rf"^[a-z]+_{SLUG}$")
+STEP_ID = re.compile(rf"^[a-z]+_{SLUG}(?:__{SLUG})*$")
+MAX_ID_CHARS = 120
 STATUSES = ("proposed", "frozen", "checked", "refuted", "reduced", "withdrawn")
 RELEASE_REASONS = (
     "hypothesis_too_weak", "missing_lemma", "statement_seems_false",
@@ -164,8 +170,24 @@ def save_programs(progs: list[dict]) -> None:
     PROGRAMS.write_text(json.dumps(progs, indent=2, ensure_ascii=False) + "\n")
 
 
+def check_root_id(sid: str) -> None:
+    if not ROOT_ID.match(sid) or sid.endswith("_neg") or len(sid) > MAX_ID_CHARS:
+        raise DeskError(f"{sid!r}: root step ids are <program>_<slug>, a snake_case name for "
+                        "what the step claims, e.g. kelly_degree_sequence (not a number)")
+
+
+def child_id(parent: str, slug: str) -> str:
+    """The id of a reduction child: <parent>__<slug>."""
+    sid = f"{parent}__{slug}"
+    if not re.fullmatch(SLUG, slug) or slug.endswith("_neg") or slug == "neg" \
+            or len(sid) > MAX_ID_CHARS:
+        raise DeskError(f"child slug {slug!r}: a snake_case name for what the child claims, "
+                        f"starting with a letter (the child's id is {parent}__<slug>)")
+    return sid
+
+
 def base_id(target: str) -> tuple[str, bool]:
-    """'found_001_neg' -> ('found_001', True); 'found_001' -> ('found_001', False)."""
+    """'found_iso_hypomorphic_neg' -> ('found_iso_hypomorphic', True); otherwise (target, False)."""
     if target.endswith("_neg"):
         return target[: -len("_neg")], True
     return target, False
@@ -493,8 +515,7 @@ def cmd_list(a) -> None:
 
 
 def cmd_propose(a) -> None:
-    if not STEP_ID.match(a.id) or "_r" in a.id:
-        raise DeskError("root step ids look like <program>_<3 digits>, e.g. found_004")
+    check_root_id(a.id)
     program = a.id.split("_")[0]
     if program not in {p["id"] for p in load_programs()}:
         raise DeskError(f"unknown program {program!r}; add it with program-add first")
@@ -672,6 +693,86 @@ def cmd_program_add(a) -> None:
     print(f"added program {a.id}")
 
 
+def rename_names(text: str, old: str, new: str) -> str:
+    """Replace the step id `old` in Lean names (S_old, S_old_neg, L_old) and doc comments."""
+    rx = re.compile(r"(?:(?<=[SLR]_)|(?<![A-Za-z0-9_]))" + re.escape(old)
+                    + r"(?=_neg(?![A-Za-z0-9_])|(?![A-Za-z0-9_]))")
+    return rx.sub(new, text)
+
+
+def cmd_rename(a) -> None:
+    """Move a root step to a new id: statement, twin, checked proof and record.
+
+    The statement keeps its exact text apart from the name, so a human approval (and the
+    fidelity reviews) of the old statement carry over. The PR that ships a rename deletes
+    files under append-only paths and needs the `trusted-change` label (tools/ci_policy.py).
+    """
+    old, new = a.old, a.new
+    check_root_id(new)
+    with locked():
+        rec = load(old)
+        if step_path(new).exists():
+            raise DeskError(f"{new} exists")
+        if not rec.get("is_root"):
+            raise DeskError("only root steps can be renamed (a child's id follows its parent)")
+        if new.split("_")[0] != rec["program"]:
+            raise DeskError(f"a rename keeps the program: start the new id with {rec['program']}_")
+        if rec["status"] not in ("proposed", "frozen", "checked") or rec["children"] or rec["reductions"]:
+            raise DeskError(f"{old} is {rec['status']} with reductions; rename steps without children")
+        if live_lease(read_leases(), old):
+            raise DeskError(f"{old} is leased; rename it when nobody is working on it")
+        users = [s["id"] for s in all_steps() if statement_module(old) in s.get("statement_imports", [])]
+        named = re.compile(rf"\b[SL]_{re.escape(old)}(?:_neg)?\b")   # not old's longer siblings
+        users += [p.stem for p in CHECKED.glob("*.lean")
+                  if p.stem != f"L_{old}" and named.search(p.read_text())]
+        if users:
+            raise DeskError(f"{old} is used by {', '.join(users)}; rename those first")
+
+        old_stmt = statement_file(old)
+        old_sha = rec["statement_sha256"]
+        path, sha = write_statement(new, rec["title"], rec["statement_en"], rec["statement_lean"],
+                                    rec.get("statement_imports", []))
+        same = rename_names(old_stmt.read_text(), old, new) == path.read_text()
+        new_files = [path]
+        try:
+            if rec["status"] == "checked":
+                old_proof = ROOT / rec["checked"]["file"]
+                proof = CHECKED / f"L_{new}.lean"
+                proof.write_text(rename_names(old_proof.read_text(), old, new))
+                new_files.append(proof)
+                ok, out = build_module(f"Recon.Checked.L_{new}")
+                if not ok:
+                    raise DeskError("the renamed proof does not build:\n" + out)
+                rec["checked"]["file"] = str(proof.relative_to(ROOT))
+                rec["checked"]["sha256"] = sha256_file(proof)
+        except Exception:
+            for f in new_files:
+                f.unlink(missing_ok=True)
+            raise
+
+        rec.update(id=new, negated_twin=f"{new}_neg", statement_file=str(path.relative_to(ROOT)),
+                   statement_sha256=sha, renamed_from=old)
+        if same:   # the text differs only in the name: approval and reviews still hold
+            if rec.get("human_approved_sha256") == old_sha:
+                rec["human_approved_sha256"] = sha
+            for f in rec["fidelity"]:
+                if f["sha256"] == old_sha:
+                    f["sha256"] = sha
+        notes = ROOT / "notes" / "sketches"
+        if (notes / old).is_dir() and not (notes / new).exists():
+            (notes / old).rename(notes / new)
+            for s in rec.get("sketches", []):
+                s["path"] = s["path"].replace(f"sketches/{old}/", f"sketches/{new}/")
+        save(rec)
+        step_path(old).unlink()
+        old_stmt.unlink()
+        if rec["status"] == "checked":
+            old_proof.unlink()
+        event("renamed", new, a.actor, renamed_from=old)
+    carried = "approval carried over" if same else "statement text changed: approve it again"
+    print(f"renamed {old} -> {new} ({carried})")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="desk.py", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -727,6 +828,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("program-add"); p.add_argument("id"); p.add_argument("--title", required=True)
     p.add_argument("--mandate", required=True); p.add_argument("--actor", default="human")
     p.set_defaults(fn=cmd_program_add)
+
+    p = sub.add_parser("rename", help="move a root step to a new id (PR needs trusted-change)")
+    p.add_argument("old"); p.add_argument("new"); p.add_argument("--actor", default="desk")
+    p.set_defaults(fn=cmd_rename)
 
     a = ap.parse_args(argv)
     try:

@@ -150,9 +150,13 @@ proposed ──(2 fidelity passes + human approve, roots only)──► frozen �
                                                                        └─ release(reason) → stays frozen, dead end logged
 ```
 
-- **Step ids.** Roots are `<program>_<nnn>`, for example `found_001`. Children are
-  `<parent>_r<k><a-d>`. The twin is `<id>_neg`, with `S_<id>_neg := ¬ S_<id>`. Every
-  statement file defines both.
+- **Step ids** say what the step claims; they never count. Roots are `<program>_<slug>`,
+  for example `found_iso_hypomorphic` or `kelly_degree_sequence`. Children of a reduction
+  are `<parent>__<slug>`, for example `kelly_degree_sequence__edge_count`. A slug is
+  snake_case and starts with a letter. The twin is `<id>_neg`, with
+  `S_<id>_neg := ¬ S_<id>`, and every statement file defines both. `desk.py rename <old>
+  <new>` moves a root step (statement, twin, proof, record) and carries its approval over;
+  that PR needs the `trusted-change` label.
 - **Fidelity.** Fidelity review is required only for roots. Children of a reduction are
   frozen automatically, because the implication is kernel-checked: a badly chosen child
   can waste effort but cannot make a false result checked.
@@ -183,6 +187,7 @@ proposed ──(2 fidelity passes + human approve, roots only)──► frozen �
 - `dead-end`
 - `sketch`
 - `program-add`
+- `rename <old> <new>`
 
 ## 6. The gate (`python3 tools/gate.py -h`)
 
@@ -192,7 +197,7 @@ proposed ──(2 fidelity passes + human approve, roots only)──► frozen �
 - `check <target> <file> --actor <label>`: the official verdict. ACCEPTED copies the file to
   `Checked/`, builds it, closes the step and cascades the assembly of ancestors.
 - `check-reduction <bundle.json> [--dry]`: reduces a step. `next-reduction <id>` prints the
-  names to use.
+  reduction theorem's name and how to name the children.
 
 ### What an ACCEPTED file satisfies
 
@@ -225,13 +230,13 @@ proposed ──(2 fidelity passes + human approve, roots only)──► frozen �
 
 ```lean
 import Mathlib
-import Recon.Statements.S_found_001
+import Recon.Statements.S_kelly_degree_sequence
 
-namespace Recon.Checked.L_found_001
+namespace Recon.Checked.L_kelly_degree_sequence
 lemma helper ... := ...
-end Recon.Checked.L_found_001
+end Recon.Checked.L_kelly_degree_sequence
 
-theorem Recon.Checked.L_found_001 : Recon.Statements.S_found_001 := by
+theorem Recon.Checked.L_kelly_degree_sequence : Recon.Statements.S_kelly_degree_sequence := by
   ...
 ```
 
@@ -241,10 +246,13 @@ The bundle lives at `notes/sketches/<id>/reduction.json`:
 
 ```json
 {"parent": "<id>", "by": "<label>", "proof_file": "lean/Recon/Scratch/<id>/reduction.lean",
- "children": [{"title": "...", "statement_en": "...", "statement_lean": "<Prop>"}, ...]}
+ "children": [{"slug": "edge_count", "title": "...", "statement_en": "...",
+               "statement_lean": "<Prop>"}, ...]}
 ```
 
-- The proof file proves `theorem Recon.Checked.R_<id>_r<k> : S_<child a> → … → S_<id> :=`.
+- Each child becomes the step `<id>__<slug>`.
+- The proof file proves `theorem Recon.Checked.R_<id>_r<k> : S_<child 1> → … → S_<id> :=`,
+  where `k` numbers the parent's reduction attempts.
 - A reduction has 2–4 children. No child may restate or reference the parent, and there
   are no duplicates.
 
@@ -341,7 +349,7 @@ and then move to open cases.
 
 | Program | Mandate | First targets |
 |---|---|---|
-| `found` | basic facts about cards, decks, hypomorphism | `found_001` (proposed): isomorphic ⇒ hypomorphic; Hypomorphic is symmetric; order and edge count recognizable |
+| `found` | basic facts about cards, decks, hypomorphism | `found_iso_hypomorphic` (checked): isomorphic ⇒ hypomorphic; Hypomorphic is symmetric; order and edge count recognizable |
 | `kelly` | Kelly's lemma and recognizable invariants | degree sequence recognizable; Kelly's counting lemma; connectedness recognizable |
 | `regular` | regular graphs are reconstructible | `ClassReconstructible (fun n G => ∃ d, G.IsRegularOfDegree d)` |
 | `discon` | disconnected graphs are reconstructible | via Kelly's lemma on components |
