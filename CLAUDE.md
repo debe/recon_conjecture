@@ -257,9 +257,10 @@ The bundle lives at `notes/sketches/<id>/reduction.json`:
 - `tools/{desk,gate,audit}.py`, `tools/hooks/` and `tools/tests/`;
 - `.claude/settings*.json`.
 
-It also blocks agents from running `desk.py approve`, setting PR labels, merging PRs and
-pushing to `main`. It guards against accidents, not against a determined adversary. The
-backstops are CI (`audit.py --clean` and `ci_policy.py` on every PR) and the humans' review.
+It also blocks agents from running `desk.py approve`, setting PR labels and pushing to
+`main`. It guards against accidents, not against a determined adversary. The backstops are
+CI (`audit.py --clean` and `ci_policy.py` on every PR) and branch protection on `main`: a PR
+merges only when the `gate` check is green on a branch that is up to date with `main`.
 
 `tools/ci_policy.py` enforces on every PR diff:
 - `Checked/` and `Statements/` are append-only;
@@ -281,10 +282,15 @@ Human-only decisions:
 2. **Approving root statements.** Any maintainer, after 2 fidelity passes:
    `! python3 tools/desk.py approve <id>` (records `approved_by` = your `recon.handle`),
    then `python3 tools/desk.py freeze <id>`.
-3. **Commits, PRs and merges.** Workflows and agents never commit, label or merge. The
-   human reviews `git diff ledger/ lean/Recon/`, commits on a branch, opens the PR and
-   merges it once CI is green. No AI attribution in commit messages or PRs.
+3. **The `trusted-change` label.** A PR that changes the judge (any trusted file) fails CI
+   until a maintainer labels it. That label is what makes agent merges safe.
 4. **Changing the gate, the desk or the toolchain pin.**
+
+Everything else is the fleet's job: pull requests are the orchestration. The main session
+ships its own results with `python3 tools/ship.py "<title>"`: audit, commit on a branch, push,
+open the PR, wait for CI, and merge when it is green. It updates the branch when `main` moved on,
+stops with the reason when CI fails, and stops when a trusted change still needs its label.
+No AI attribution in commit messages or PRs.
 
 ## 8. Workflow catalogue (`.claude/workflows/`)
 
@@ -317,10 +323,11 @@ rules); a request like "run a campaign round" counts.
 3. Run `campaign` (or a single `think`, `build`, `redteam` or `reduce`).
 4. Read the result and the round report. Confirm every claimed check with
    `desk.py status <id>`.
-5. Every few rounds, and always before a commit, run `python3 tools/audit.py`. It must end
-   with AUDIT PASSED. Then the human pushes the branch and opens a PR; a result counts once
-   CI is green and the PR is merged. If CI asks for `gate.py assemble <id>` after a rebase,
-   run it and push again.
+5. Ship what the round produced: `python3 tools/ship.py "<what closed>"`. It runs
+   `audit.py` (must end with AUDIT PASSED), commits the fleet's outputs (`ledger/`,
+   `Checked/`, `Statements/`, `notes/`) on a branch, opens the PR, waits for CI and merges on
+   green. A result counts once that merge lands. If CI asks for `gate.py assemble <id>`, run
+   it and ship again.
 6. If a round closes nothing, stop and re-plan: try a different angle, a reduction, a
    smaller statement, or a librarian sweep. Do not repeat the same attack with more agents.
 
