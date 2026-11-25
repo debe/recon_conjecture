@@ -4,3 +4,9 @@
 {"ts": "2026-11-24T19:59:21+00:00", "kind": "program_added", "step": null, "actor": "human", "program": "discon"}
 {"ts": "2026-11-24T19:59:21+00:00", "kind": "program_added", "step": null, "actor": "human", "program": "trees"}
 {"ts": "2026-11-24T19:59:37+00:00", "kind": "proposed", "step": "found_001", "actor": "human", "title": "Isomorphic graphs are hypomorphic"}
+{"ts": "2026-11-25T10:20:30+00:00", "kind": "approved", "step": "found_001", "actor": "debe/human"}
+{"ts": "2026-11-25T10:31:56+00:00", "kind": "fidelity", "step": "found_001", "actor": "debe/fid-backtranslate", "verdict": "pass"}
+{"ts": "2026-11-25T10:34:18+00:00", "kind": "fidelity", "step": "found_001", "actor": "debe/fid-testing", "verdict": "pass"}
+{"ts": "2026-11-25T10:34:43+00:00", "kind": "frozen", "step": "found_001", "actor": "debe/desk"}
+{"ts": "2026-11-25T10:54:37+00:00", "kind": "verdict", "step": "found_001", "actor": "debe/b1", "target": "found_001", "verdict": "ACCEPTED", "file": "lean/Recon/Checked/L_found_001.lean"}
+{"ts": "2026-11-25T10:54:37+00:00", "kind": "checked", "step": "found_001", "actor": "debe/b1", "file": "lean/Recon/Checked/L_found_001.lean"}
