@@ -42,7 +42,8 @@ function computeLayout() {
     : [...new Set([...S.steps.values()].map(s => s.program))].map(id => ({ id, title: id }));
   let y = 0;
   const place = (id, x0, d, top) => {
-    nodes.set(id, { x: x0 + span(id) * DX / 2, y: top + HEAD + 18 + d * DY });
+    // +40: room for a lease chip above the first row without covering the program title
+    nodes.set(id, { x: x0 + span(id) * DX / 2, y: top + HEAD + 40 + d * DY });
     let x = x0;
     for (const c of kids(id)) { place(c, x, d + 1, top); x += span(c) * DX; }
   };
@@ -54,7 +55,7 @@ function computeLayout() {
     const d = roots.length ? Math.max(...roots.map(depth)) : 0;
     let x = PAD;
     for (const r of roots) { place(r, x, 0, y); x += span(r) * DX; }
-    const h = HEAD + (d ? d * DY + 22 : 26);
+    const h = HEAD + (d ? d * DY + 44 : 26);
     regions.push({ p, y, h, w: Math.max(3, w) * DX + 2 * PAD, n: roots.length });
     y += h + GAP;
   }
