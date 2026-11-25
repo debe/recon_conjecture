@@ -7,3 +7,6 @@ __pycache__/
 *.json.tmp
 .claude/settings.local.json
 site/state.json
+
+# Operator-only deployment files (unit, proxy config, deploy scripts): never published
+relay/local/
