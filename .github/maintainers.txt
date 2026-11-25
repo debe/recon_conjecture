@@ -1,0 +1,3 @@
+# GitHub handles allowed to approve root statements (desk.py approve records approved_by).
+# A PR cannot add its own approver: ci_policy.py reads this file from the PR's base.
+debe
