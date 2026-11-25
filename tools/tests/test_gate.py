@@ -51,6 +51,20 @@ def _cleanup_lean(ids: list[str]) -> None:
         p.unlink()
 
 
+@pytest.fixture(scope="module", autouse=True)
+def quiet_identity():
+    """Tests approve as a fixed handle and never publish live events."""
+    import os
+    saved = {k: os.environ.get(k) for k in ("RECON_HANDLE", "RECON_LIVE")}
+    os.environ.update(RECON_HANDLE="tester", RECON_LIVE="off")
+    yield
+    for k, v in saved.items():
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = v
+
+
 @pytest.fixture(scope="module")
 def ledger(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("ledger")
