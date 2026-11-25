@@ -1,0 +1,15 @@
+{"parent": "conj_kelly_ulam__disconnected", "by": "reducer", "proof_file": "lean/Recon/Scratch/conj_kelly_ulam__disconnected/reduction.lean",
+ "children": [
+  {"slug": "connected_recognizable", "title": "Connectedness is recognizable",
+   "statement_en": "Connectedness is recognizable from the deck for graphs on at least 3 vertices (Kelly 1957: for n >= 3, G is connected iff at least two cards are connected).",
+   "statement_lean": "Recon.Recognizable (fun n G => G.Connected)"},
+  {"slug": "kelly_induced_count", "title": "Kelly's lemma (induced form)",
+   "statement_en": "Kelly's lemma, induced form: if G and H on n vertices are hypomorphic, then for every k < n and every graph F on k vertices, G and H have the same number of k-vertex subsets inducing a copy of F.",
+   "statement_lean": "∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → ∀ k : ℕ, k < n → ∀ F : SimpleGraph (Fin k), {S : Finset (Fin n) | Nonempty (G.induce (S : Set (Fin n)) ≃g F)}.ncard = {S : Finset (Fin n) | Nonempty (H.induce (S : Set (Fin n)) ≃g F)}.ncard"},
+  {"slug": "component_counts_of_induced_counts", "title": "Induced subgraph counts determine component counts of disconnected graphs",
+   "statement_en": "If G and H on n vertices are both disconnected and have the same number of induced copies of every graph on fewer than n vertices, then for every connected graph F they have the same number of connected components isomorphic to F (triangular solve: induced connected copies lie inside one component, all components have fewer than n vertices).",
+   "statement_lean": "∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), ¬ G.Connected → ¬ H.Connected → (∀ k : ℕ, k < n → ∀ F : SimpleGraph (Fin k), {S : Finset (Fin n) | Nonempty (G.induce (S : Set (Fin n)) ≃g F)}.ncard = {S : Finset (Fin n) | Nonempty (H.induce (S : Set (Fin n)) ≃g F)}.ncard) → ∀ k : ℕ, ∀ F : SimpleGraph (Fin k), F.Connected → {c : G.ConnectedComponent | Nonempty (G.induce c.supp ≃g F)}.ncard = {c : H.ConnectedComponent | Nonempty (H.induce c.supp ≃g F)}.ncard"},
+  {"slug": "iso_of_component_counts", "title": "Equal component counts imply isomorphism",
+   "statement_en": "Two graphs on n vertices with the same number of connected components isomorphic to each connected graph F are isomorphic.",
+   "statement_lean": "∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), (∀ k : ℕ, ∀ F : SimpleGraph (Fin k), F.Connected → {c : G.ConnectedComponent | Nonempty (G.induce c.supp ≃g F)}.ncard = {c : H.ConnectedComponent | Nonempty (H.induce c.supp ≃g F)}.ncard) → Nonempty (G ≃g H)"}
+ ]}
