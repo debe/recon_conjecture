@@ -7,7 +7,7 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__disconnected__component_counts_of_induced_counts.lean",
   "statement_sha256": "67aa8a325f09445ff5b8a212b810b8ed56abd1bdcb0fb6e849d0939245c96f12",
-  "status": "frozen",
+  "status": "checked",
   "author": "reducer",
   "created": "2026-11-25T15:41:55+00:00",
   "parent": "conj_kelly_ulam__disconnected",
@@ -19,7 +19,19 @@
   "negated_twin": "conj_kelly_ulam__disconnected__component_counts_of_induced_counts_neg",
   "dead_ends": [],
   "sketches": [],
-  "checked": null,
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__disconnected__component_counts_of_induced_counts.lean",
+    "sha256": "c6618fe20603a6b64c014fcab8daecb3aabd42674fd5082377307a8ca529d945",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T16:02:11+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
   "refuted": null,
   "priority": 50,
   "frozen_at": "2026-11-25T15:41:55+00:00"
