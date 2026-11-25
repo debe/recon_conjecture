@@ -1,0 +1,31 @@
+{
+ "parent": "conj_kelly_ulam__connected_dominating_or_diam2",
+ "by": "reducer",
+ "proof_file": "lean/Recon/Scratch/conj_kelly_ulam__connected_dominating_or_diam2/reduction.lean",
+ "children": [
+  {
+   "slug": "pure_degree_class",
+   "title": "A pure degree class makes a graph reconstructible (t4 Lemma P)",
+   "statement_en": "Every graph G on at least 3 vertices that has a vertex u whose degree class is pure is reconstructible: pure means that for any two ordered pairs of distinct vertices (x, y), (x', y') with deg x = deg x' = deg u and G - x - y isomorphic to G - x' - y', x ~ y iff x' ~ y'. (Sketch t4 section 4; no source found, attribution UNVERIFIED.)",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')))"
+  },
+  {
+   "slug": "unique_copy_gluing",
+   "title": "Two-card gluing at a unique-copy pair with factorizing automorphism group (t4 section 6, anchor A1)",
+   "statement_en": "Every graph G on at least 3 vertices with a pair u != v such that the two-deleted subgraph F = G - {u, v} occurs as an induced subgraph of G only on its own vertex set, and every automorphism g of F factors as g = k h^{-1} with h fixing N(v) on F setwise and k fixing N(u) on F setwise (Aut(F) = Stab(N(u)) Stab(N(v))), is reconstructible. (Sketch t4 section 6, extending t2 lemma C; no source found, attribution UNVERIFIED.)",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1)))"
+  },
+  {
+   "slug": "dominating_edge_impure",
+   "title": "Residual: dominating-edge graphs with no pure degree class and no unique-copy gluing pair",
+   "statement_en": "Every graph G on at least 3 vertices such that G and its complement are connected, G has a dominating edge, G has no pure degree class (as in pure_degree_class) and no unique-copy factorizing pair (as in unique_copy_gluing) is reconstructible. Open.",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => G.Connected ∧ Gᶜ.Connected ∧ (∃ u v : Fin n, G.Adj u v ∧ ∀ x : Fin n, x = u ∨ x = v ∨ G.Adj x u ∨ G.Adj x v) ∧ ¬ (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')) ∧ ¬ (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1)))"
+  },
+  {
+   "slug": "diam2_impure",
+   "title": "Residual: graphs with G and complement of diameter at most 2, no pure degree class and no unique-copy gluing pair",
+   "statement_en": "Every graph G on at least 3 vertices such that G and its complement are connected, every pair of vertices has distance at most 2 in G and in its complement, G has no pure degree class (as in pure_degree_class) and no unique-copy factorizing pair (as in unique_copy_gluing) is reconstructible. Open.",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => G.Connected ∧ Gᶜ.Connected ∧ (∀ u v : Fin n, G.edist u v ≤ 2 ∧ Gᶜ.edist u v ≤ 2) ∧ ¬ (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')) ∧ ¬ (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1)))"
+  }
+ ]
+}
