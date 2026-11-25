@@ -43,7 +43,14 @@
   ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2_neg",
   "dead_ends": [],
-  "sketches": [],
+  "sketches": [
+    {
+      "path": "notes/sketches/conj_kelly_ulam__connected_dominating_or_diam2/t5.md",
+      "by": "t5",
+      "at": "2026-11-25T20:57:40+00:00",
+      "survived_refutation": false
+    }
+  ],
   "checked": null,
   "refuted": null,
   "priority": 50,
