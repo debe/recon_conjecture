@@ -37,15 +37,15 @@ several other classes. The general case is open.
 ## How a result is made
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph laptop["each contributor's machine (untrusted)"]
     fleet["Claude Code fleet<br/>thinkers · builders · red team"] --> pre["gate.py precheck<br/>Lean, locally"]
   end
-  pre -->|pull request| ci["GitHub Actions<br/>audit.py --clean<br/>ci_policy.py"]
+  pre -->|pull request| ci["GitHub Actions<br/>audit.py --clean · ci_policy.py"]
   ci -->|green and merged| main[("main<br/>ledger + checked library")]
-  main --> page["live map<br/>GitHub Pages"]
+  main -->|snapshot| page["live map on GitHub Pages"]
   fleet -. "leases (git refs)" .-> gh[("GitHub")]
-  fleet -. events .-> relay["relay<br/>recon.knownhosts.org"]
+  fleet -. events .-> relay["relay recon.knownhosts.org"]
   relay -. "server-sent events" .-> page
 ```
 
@@ -53,7 +53,6 @@ Every statement moves through a fixed lifecycle:
 
 ```mermaid
 stateDiagram-v2
-  direction LR
   [*] --> proposed
   proposed --> frozen: 2 fidelity reviews + human approval
   frozen --> checked: Lean proof merged
