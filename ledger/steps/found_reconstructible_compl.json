@@ -1,0 +1,55 @@
+{
+  "id": "found_reconstructible_compl",
+  "program": "found",
+  "title": "A graph is reconstructible iff its complement is",
+  "statement_en": "For every n and every graph G on Fin n: G is reconstructible if and only if its complement is reconstructible. (Standard; Bondy 1991; structural_reductions.md C2.)",
+  "statement_lean": "∀ n : ℕ, ∀ G : SimpleGraph (Fin n), Recon.Reconstructible G ↔ Recon.Reconstructible Gᶜ",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_found_reconstructible_compl.lean",
+  "statement_sha256": "1c4ea8791a38f0ae45134090f472208eaa21565980c64ddb3a89a99f1fbef3cb",
+  "status": "checked",
+  "author": "debe/main",
+  "created": "2026-11-25T13:21:29+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_reconstructible_compl (lens: back-translation, reviewer fid-backtranslate)\n\n## Lean statement\n`∀ n : ℕ, ∀ G : SimpleGraph (Fin n), Recon.Reconstructible G ↔ Recon.Reconstructible Gᶜ`\n\n## Independent English reading (written before reading statement_en)\nFor every natural number n (including 0, 1, 2) and every simple graph G with vertex set Fin n,\nthe following are equivalent:\n(a) for every simple graph H on Fin n, if there is a permutation σ of Fin n such that for every\n    vertex x the induced subgraph of G on Fin n \\ {x} is isomorphic to the induced subgraph of H\n    on Fin n \\ {σ x}, then G and H are isomorphic;\n(b) the same property for the complement graph Gᶜ (adjacency: x ≠ y and not G.Adj x y) in place of G.\nIn short: G is reconstructible iff its complement is reconstructible, with no lower bound on n.\n\n## Comparison with statement_en\nstatement_en: \"For every n and every graph G on Fin n: G is reconstructible if and only if its\ncomplement is reconstructible.\"\n- Quantifiers: ∀ n, ∀ G. Both are universal, there is no ordering issue, and they match \"for every n and every graph G\".\n- Domain: Fin n on both sides. `Reconstructible` quantifies H over Fin n, which matches the English convention.\n- No n ≥ 3 hypothesis: the English also says \"every n\". The claim holds for every n because\n  (Gᶜ).induce s = (G.induce s)ᶜ and isomorphisms preserve complements. So Hypomorphic G H ↔\n  Hypomorphic Gᶜ Hᶜ and G ≃g H ↔ Gᶜ ≃g Hᶜ, and H ↦ Hᶜ is an involution. Leaving out the hypothesis is\n  therefore not an error. At n = 2 both sides are false for G = ⊤ (Gᶜ = ⊥), by the anchors in Basic.lean.\n- Notion of complement: checked by elaboration (pp.explicit, `#print`). The right-hand side is\n  `@Recon.Reconstructible n (@compl (SimpleGraph (Fin n)) (@SimpleGraph.instCompl (Fin n)) G)`.\n  This is the graph complement. It is not the Prop complement `(Reconstructible G)ᶜ`, a misparse\n  that would make the statement equivalent to `R ↔ ¬R` and so false.\n- Deck/isomorphism notions: these are the standard Basic.lean `Hypomorphic` (bijection σ with every card\n  matched up to isomorphism) and `Nonempty (G ≃g H)`, the same notions as everywhere else.\n- Vacuity/triviality: the statement is not vacuous because it has no hypotheses. It is not trivially true by\n  definition either: it needs the complement-commutes-with-induce argument. Both sides are false at n = 2 and both are true for\n  small n ≥ 3 (McKay), so the iff carries real content. It is a standard easy fact (Bondy 1991).\n- Coercions: none affect meaning. The only implicit argument is n, which is the same on both sides.\n\n## Verdict\nPASS. The Lean statement says exactly what statement_en says.\n",
+      "sha256": "1c4ea8791a38f0ae45134090f472208eaa21565980c64ddb3a89a99f1fbef3cb",
+      "at": "2026-11-25T13:23:16+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_reconstructible_compl (lens: testing, reviewer fid-testing)\n\nStatement (sha256 1c4ea879...):\n`∀ n : ℕ, ∀ G : SimpleGraph (Fin n), Recon.Reconstructible G ↔ Recon.Reconstructible Gᶜ`\n\nEnglish: \"For every n and every graph G on Fin n: G is reconstructible if and only if its\ncomplement is reconstructible.\"\n\n## Predicates encoded\n\n- **Lean reading (literal, from Basic.lean):**\n  - `Hypomorphic G H`: some bijection σ : Fin n → Fin n has `card G x ≅ card H (σ x)` for\n    every x. I brute-forced all n! permutations over a card-isomorphism matrix built with\n    `nx.is_isomorphic`, independently of `canon`/`deck_key`.\n  - `Reconstructible G`: every H on Fin n that is Hypomorphic to G is isomorphic to G.\n    H ranges over all labeled graphs for n ≤ 4 (2^C(n,2) of them) and over the isomorphism\n    representatives for n = 5 and 6. Both Hypomorphic and ≃g are invariant under\n    relabeling H, so the representatives are enough.\n  - `Gᶜ` is `nx.complement` on the same vertex set, i.e. the loopless Mathlib complement.\n- **English reading:** the deck is the multiset of card isomorphism classes (`deck_key`).\n  G is reconstructible when every graph with the same deck is isomorphic to G (`canon`).\n  The claim is then recon(G) == recon(complement G).\n\n## Results (all graphs, n = 0..6; script in the session scratchpad)\n\n| n | graphs | H range | reconstructible | not |\n|---|---|---|---|---|\n| 0 | 1 | 1 labeled | 1 | 0 |\n| 1 | 1 | 1 labeled | 1 | 0 |\n| 2 | 2 | 2 labeled | 0 | 2 (K2, 2K1) |\n| 3 | 4 | 8 labeled | 4 | 0 |\n| 4 | 11 | 64 labeled | 11 | 0 |\n| 5 | 34 | 34 reps | 34 | 0 |\n| 6 | 156 | 156 reps | 156 | 0 |\n\n- The Lean and English predicates for `Reconstructible` never differ on a single graph.\n- The Lean and English truth values of the statement instance never differ on a single graph.\n- The Lean statement instance never fails. Mismatches: none.\n\n## Vacuity / triviality\n\n- There is no hypothesis, so it cannot be vacuous. Neither side is constant:\n  `Reconstructible` is false at n = 2 (K2 and 2K1 are complements of each other, so this\n  checks false ↔ false) and true for every n ∈ {0, 1, 3..6}.\n- The statement is not trivially true by its form. `Gᶜ` is the genuine complement, not G.\n  Proving it needs card(Gᶜ, x) = (card G x)ᶜ, that complement preserves ≃g, and an\n  application to Hᶜ.\n- Having no n ≥ 3 hypothesis matches the English \"for every n\". The claim is true for\n  n < 3 as well, and the table confirms this for n = 0, 1, 2.\n\n## Failure-mode checklist\n\n- **Quantifier order:** ∀ n ∀ G, then a biconditional. This matches the English.\n- **Hypotheses:** nothing is missing or extra; an n ≥ 3 hypothesis is not needed.\n- **Fin n:** matches the English, which says \"graph G on Fin n\". `Reconstructible` quantifies\n  H over Fin n, which is the standard meaning.\n- **Off-by-one:** there are no bounds.\n- **Notion of deck / iso:** the bijection-of-cards definition agrees with multiset-of-classes\n  on every tested pair.\n- **Coercions:** none. `Gᶜ : SimpleGraph (Fin n)` uses Mathlib's `HasCompl`, which is irreflexive.\n\n## Caveat on test power\n\nThe conjecture holds for n ≤ 13, so for n ≥ 3 both sides are always true and the\nbiconditional is only exercised as true ↔ true. At n = 2 it is exercised as false ↔ false.\nThe test therefore mainly confirms that the definitions agree; the statement's meaning is\nalso clear from direct reading.\n\nVerdict: **pass**.\n",
+      "sha256": "1c4ea8791a38f0ae45134090f472208eaa21565980c64ddb3a89a99f1fbef3cb",
+      "at": "2026-11-25T13:28:31+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "found_reconstructible_compl_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_found_reconstructible_compl.lean",
+    "sha256": "536f740d4c5cca4474cbc96b0ac95938857120559f1cf05970c1be69566bb2ce",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T13:46:10+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "1c4ea8791a38f0ae45134090f472208eaa21565980c64ddb3a89a99f1fbef3cb",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T13:44:59+00:00"
+}

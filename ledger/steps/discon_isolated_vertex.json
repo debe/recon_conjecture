@@ -1,0 +1,68 @@
+{
+  "id": "discon_isolated_vertex",
+  "program": "discon",
+  "title": "Graphs with an isolated vertex are reconstructible",
+  "statement_en": "Every graph on at least 3 vertices that has an isolated vertex (a vertex adjacent to no vertex) is reconstructible. (Special case of Kelly 1957 on disconnected graphs; structural_reductions.md C5.)",
+  "statement_lean": "Recon.ClassReconstructible (fun n G => ∃ v : Fin n, ∀ w : Fin n, ¬ G.Adj v w)",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_discon_isolated_vertex.lean",
+  "statement_sha256": "f736cc9a2b14077f6f3aa273fbcd3dd1d9580a8a0bcfb860347b383b945f20a0",
+  "status": "checked",
+  "author": "debe/main",
+  "created": "2026-11-25T13:22:14+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: discon_isolated_vertex (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\n\nEnglish: every graph on at least 3 vertices that has an isolated vertex is reconstructible.\n\nLean: `Recon.ClassReconstructible (fun n G => ∃ v : Fin n, ∀ w : Fin n, ¬ G.Adj v w)`.\n\nWhen `ClassReconstructible`, `Reconstructible` and `Hypomorphic` from `Basic.lean` are unfolded, this reads:\nfor all n ≥ 3 and every G : SimpleGraph (Fin n) that has a vertex v with no neighbour, every\nH : SimpleGraph (Fin n) with a vertex bijection σ such that each card G − x ≅ H − σx is isomorphic to G.\n\n## Encoded predicates\n\nThe check script is `notes/sketches/discon_isolated_vertex/fidelity_fid-testing_check.py`. It uses\n`tools/search/small_graphs.py` as a library.\n\n- `lean_C(n, G)`: `any(all(not G.has_edge(v, w) for w in range(n)) for v in range(n))`, read literally from the Lean.\n- `en_C(n, G)`: `any(G.degree(v) == 0 ...)`, read from the English \"a vertex adjacent to no vertex\".\n- Scope: Lean `3 ≤ n` (from `ClassReconstructible`) against English \"at least 3 vertices\".\n\n## Results\n\n1. **Class predicate, all labelled graphs n = 0..6:** 0 differences across 33,868 labelled graphs.\n   The counts where the predicate holds are n=3: 4/8, n=4: 23/64, n=5: 256/1024 and n=6: 5319/32768.\n   Labelled graphs are used because the Lean quantifies over labelled graphs on `Fin n`. The\n   `w = v` case is harmless because `SimpleGraph` is loopless.\n2. **Scope:** the two readings agree for n = 0..9. The guard is `3 ≤ n`, with no off-by-one.\n3. **Whole statement, unlabelled classes n = 0..6:** the Lean reading and the English reading\n   give the same truth value at every n, and both hold.\n   - The members per n are 1, 2, 4, 11 and 34 for n = 2..6. These equal the number of graphs\n     on n − 1 vertices, as expected.\n   - Each member's deck class is a singleton.\n4. **The guard is load-bearing:** at n = 2, 2K₁ has an isolated vertex and is hypomorphic to K₂,\n   but the two are not isomorphic. The statement would be false without `3 ≤ n`, and that\n   hypothesis is present.\n\n## Vacuity and triviality\n\n- **Not vacuous:** the hypothesis holds for many graphs at every n ≥ 3 (see the counts above).\n- **Not trivially true:** members are not limited to the edgeless graph. There are 1, 3, 10\n  and 33 members with edges for n = 3..6.\n- The conclusion quantifies over **all** H on `Fin n`, not only H in the class. This is the\n  correct, strong notion of reconstructibility.\n\n## Failure-mode checklist\n\n- Quantifier order: correct (∃ v ∀ w).\n- `Fin n`: this follows the project convention. A deck determines n, so restricting H to\n  `Fin n` loses nothing.\n- Isomorphism and deck: these use the trusted `Hypomorphic` (a bijection matching cards up to\n  isomorphism), which is equivalent to equality of decks as multisets. The conclusion uses\n  `Nonempty (G ≃g H)`, which is the correct notion.\n- Coercions: none.\n\nNo mismatch found.\n",
+      "sha256": "f736cc9a2b14077f6f3aa273fbcd3dd1d9580a8a0bcfb860347b383b945f20a0",
+      "at": "2026-11-25T13:23:11+00:00"
+    },
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: discon_isolated_vertex (lens: back-translation)\n\nReviewer: fid-backtranslate. Verdict: **pass**.\n\n## Lean statement\n\n    Recon.ClassReconstructible (fun n G => ∃ v : Fin n, ∀ w : Fin n, ¬ G.Adj v w)\n\nThe statement file elaborates (`lake env lean Recon/Statements/S_discon_isolated_vertex.lean` OK).\n\n## Independent back-translation (written before reading statement_en)\n\nExpanding `ClassReconstructible`, `Reconstructible` and `Hypomorphic` from `Basic.lean`:\n\nFor every natural number n with 3 ≤ n, and every simple graph G on vertex set Fin n,\nif there is a vertex v of G such that no vertex w is adjacent to v, then for every\nsimple graph H on Fin n: if there is a bijection σ : Fin n ≃ Fin n such that for each\nvertex x the card G − x (induced subgraph on {x}ᶜ) is isomorphic to the card H − σ x,\nthen G is isomorphic to H.\n\nIn words: every graph on n ≥ 3 vertices with an isolated vertex is reconstructible\n(every graph with the same deck is isomorphic to it).\n\n## Clause-by-clause comparison with statement_en\n\n| English clause | Lean | Match |\n|---|---|---|\n| \"Every graph\" | `∀ G : SimpleGraph (Fin n)` inside `ClassReconstructible` | yes; Fin n is the repo's standard headline encoding, and any finite graph is isomorphic to one on Fin n |\n| \"on at least 3 vertices\" | `3 ≤ n` in `ClassReconstructible` | yes; ≤ not <, correct bound (n = 2 fails by the anchor, and K₂ vs 2K₁ is exactly an isolated-vertex case, so the bound matters and is present) |\n| \"has an isolated vertex (adjacent to no vertex)\" | `∃ v : Fin n, ∀ w : Fin n, ¬ G.Adj v w` | yes; quantifier order ∃v ∀w is correct (∀w ∃v would be a different, wrong condition). Including w = v is harmless since SimpleGraph is loopless |\n| \"is reconstructible\" | `Reconstructible G`: ∀ H on Fin n, Hypomorphic G H → Nonempty (G ≃g H) | yes; H ranges over all graphs, not only those with an isolated vertex, which is the correct (stronger) notion |\n\n## Failure-mode checklist\n\n- Quantifier order/scope: ∃ v ∀ w, correct. n is bound before G; G and H share Fin n (hypomorphic graphs have equally many cards, so no loss).\n- Missing/extra hypothesis: n ≥ 3 present, nothing extra.\n- Fin n vs arbitrary types: standard convention; no loss.\n- ≤ vs <, off-by-one: `3 ≤ n`, correct.\n- Vacuity: not vacuous; e.g. the empty graph on Fin 3 satisfies the class predicate.\n- Triviality: not trivial; it requires a genuine argument (the deck recognises |E|, a card\n  with |E| edges comes from an isolated vertex, add back K₁). It is a special case of\n  Kelly 1957, so there is no reason to expect a refutation.\n- Isomorphism/card/deck notion: uses the trusted `Hypomorphic` (bijection-matched cards,\n  Bondy–Hemminger) and `≃g`; correct.\n- Nonempty vs structure: `Nonempty (G ≃g H)`, correct for a Prop.\n- Coercions: none in the class predicate.\n\nNo mismatch found.\n",
+      "sha256": "f736cc9a2b14077f6f3aa273fbcd3dd1d9580a8a0bcfb860347b383b945f20a0",
+      "at": "2026-11-25T13:23:22+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "discon_isolated_vertex_neg",
+  "dead_ends": [],
+  "sketches": [
+    {
+      "path": "notes/sketches/discon_isolated_vertex/t1.md",
+      "by": "t1",
+      "at": "2026-11-25T13:51:43+00:00",
+      "survived_refutation": true
+    },
+    {
+      "path": "notes/sketches/discon_isolated_vertex/t2.md",
+      "by": "t2",
+      "at": "2026-11-25T13:51:43+00:00",
+      "survived_refutation": true
+    }
+  ],
+  "checked": {
+    "file": "lean/Recon/Checked/L_discon_isolated_vertex.lean",
+    "sha256": "d7a2c02183eb065441055c427db45ec7affd3fd16cd0f14b14efea0194b5f80f",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T13:52:25+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "f736cc9a2b14077f6f3aa273fbcd3dd1d9580a8a0bcfb860347b383b945f20a0",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T13:44:59+00:00"
+}

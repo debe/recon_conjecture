@@ -33,5 +33,12 @@
     "mandate": "Prove that trees are reconstructible (Kelly 1957).",
     "status": "active",
     "created": "2026-11-24T19:59:21+00:00"
+  },
+  {
+    "id": "conj",
+    "title": "The conjecture itself",
+    "mandate": "Hold the root step for the Kelly-Ulam conjecture (its body is exactly Recon.ReconstructionConjecture from Basic.lean) and grow its reduction tree: every class or lemma the attack needs enters as a child of a kernel-checked reduction, so it needs no human approval.",
+    "status": "active",
+    "created": "2026-11-25T13:50:04+00:00"
   }
 ]

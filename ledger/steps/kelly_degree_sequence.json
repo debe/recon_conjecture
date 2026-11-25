@@ -1,0 +1,55 @@
+{
+  "id": "kelly_degree_sequence",
+  "program": "kelly",
+  "title": "The degree sequence is recognizable",
+  "statement_en": "For every n at least 3 and all graphs G, H on Fin n: if G and H are hypomorphic, then some bijection σ of the vertices satisfies deg_G(v) = deg_H(σ v) for every vertex v (degrees counted as the number of neighbours). (Kelly 1957; Bondy-Murty GTM 244 Cor. 2.22; deg v = |E| - |E(G - v)|.)",
+  "statement_lean": "∀ n : ℕ, 3 ≤ n → ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → ∃ σ : Fin n ≃ Fin n, ∀ v : Fin n, (G.neighborSet v).ncard = (H.neighborSet (σ v)).ncard",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_kelly_degree_sequence.lean",
+  "statement_sha256": "fdb95f96ebae0c39289d4ecea16280e03cd42c954aae55143c056f4aba6fc362",
+  "status": "checked",
+  "author": "debe/main",
+  "created": "2026-11-25T13:21:53+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_degree_sequence (lens: back-translation, reviewer fid-backtranslate)\n\nVerdict: PASS\n\n## 1. Independent back-translation (written before reading statement_en)\n\nLean:\n`∀ n : ℕ, 3 ≤ n → ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H →\n ∃ σ : Fin n ≃ Fin n, ∀ v : Fin n, (G.neighborSet v).ncard = (H.neighborSet (σ v)).ncard`\n\nExpanding `Recon.Hypomorphic` and `Recon.card` (Basic.lean):\n`Hypomorphic G H := ∃ τ : Fin n ≃ Fin n, ∀ x, Nonempty (G.induce {x}ᶜ ≃g H.induce {τ x}ᶜ)`.\n\nMy reading: For every natural number n with n ≥ 3, and all simple graphs G, H on the vertex\nset {0, …, n−1}: if there is a bijection τ of the vertices such that for every vertex x the\nvertex-deleted induced subgraph G − x is isomorphic to H − τ(x), then there is a bijection σ\nof the vertices (possibly different from τ) such that for every vertex v, the number of\nneighbours of v in G equals the number of neighbours of σ(v) in H. Equivalently: hypomorphic\ngraphs on n ≥ 3 vertices have the same multiset of vertex degrees (same degree sequence).\n\n## 2. Clause-by-clause comparison with statement_en\n\n| English clause | Lean | Match |\n|---|---|---|\n| for every n at least 3 | `∀ n : ℕ, 3 ≤ n →` | yes (≤, not <; n = 3 included) |\n| all graphs G, H on Fin n | `∀ G H : SimpleGraph (Fin n)` | yes; both on the same Fin n |\n| G and H hypomorphic | `Recon.Hypomorphic G H` | yes; trusted definition, standard (Bondy–Hemminger) |\n| some bijection σ of the vertices | `∃ σ : Fin n ≃ Fin n` | yes; existential, chosen after G, H |\n| deg_G(v) = deg_H(σ v) for every v | `∀ v, (G.neighborSet v).ncard = (H.neighborSet (σ v)).ncard` | yes |\n| degrees counted as number of neighbours | `neighborSet … .ncard` | yes |\n\n## 3. Failure-mode checklist\n\n- Quantifier order/scope: σ is existential under ∀ n G H and the hypothesis; ∀ v is inside ∃ σ.\n  This is exactly \"same degree multiset\". Correct.\n- n ≥ 3 present. It is load-bearing: at n = 2, K₂ and 2K₁ are hypomorphic\n  (`anchor_two_vertices_hypomorphic`) but degree sequences (1,1) vs (0,0) differ, so\n  without it the statement would be false.\n- Fin n vs arbitrary types: same as English (\"graphs on Fin n\"); consistent with the\n  repository convention for headline statements.\n- ncard coercion: `neighborSet v` is a subset of the finite type `Fin n`, so it is finite and\n  `Set.ncard` equals the true neighbour count (the infinite-set junk value 0 never arises).\n  It equals Mathlib's `G.degree v` for any Fintype instance; using ncard avoids\n  DecidableRel instance dependence. No meaning change.\n- Vacuity: hypothesis satisfiable (e.g. H = G, `anchor_hypomorphic_refl`). Not trivially\n  true: the conclusion fails for non-hypomorphic pairs (e.g. K₃ vs empty on Fin 3), so\n  the hypomorphism hypothesis does real work.\n- Notion of deck/iso: inherited from trusted `Hypomorphic` (induced vertex-deleted cards,\n  graph isos `≃g`, Nonempty — correct, an iso only needs to exist).\n- Weaker-than-ideal? The statement does not require σ = τ (the hypomorphism bijection).\n  The English also only says \"some bijection\", so this matches. (Note for builders: the\n  standard proof deg v = |E| − |E(G − v)| actually gives σ = τ, so the statement is\n  provable along the cited route.)\n- Truth: standard result (Kelly 1957; cited Bondy–Murty GTM 244 Cor. 2.22 — citation not\n  re-verified by this reviewer, UNVERIFIED). The mathematical content is the textbook\n  argument above; no reason to suspect falsity.\n\n## 4. Conclusion\n\nThe Lean statement says exactly what statement_en says: hypomorphic graphs on n ≥ 3\nvertices have equal degree sequences, expressed as a degree-preserving vertex bijection.\nNo mismatch found.\n",
+      "sha256": "fdb95f96ebae0c39289d4ecea16280e03cd42c954aae55143c056f4aba6fc362",
+      "at": "2026-11-25T13:22:55+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_degree_sequence (lens: testing), reviewer fid-testing\n\nVerdict: **pass**\n\n## Readings encoded\n\n- **Lean predicate** (taken literally): for a given n, G, H on Fin n:\n  `3 ≤ n → Hypomorphic G H → ∃ σ : Fin n ≃ Fin n, ∀ v, |N_G(v)| = |N_H(σ v)|`, with\n  `Hypomorphic` implemented exactly as in `Basic.lean`: brute force over all permutations σ,\n  checking that card `G - x` ≅ card `H - σ x` for every x (canonical forms of the cards).\n  The conclusion is also brute force over all permutations σ, comparing degrees pointwise.\n- **English predicate:** n ≥ 3 and same deck (equal multisets of card isomorphism classes,\n  `deck_key`) ⇒ equal sorted degree sequences.\n\n## Search (tools/search/small_graphs.py as a library)\n\n- All ordered pairs of isomorphism-class representatives for n = 0..6 (`all_graphs`), with\n  the Lean and English predicates compared on every pair: **0 differences**.\n- The literal `Hypomorphic` (∃ bijection matching the cards) agreed with deck-multiset\n  equality on every pair for n ≤ 5, with no prefilter. For n = 6 it agreed on every same-deck\n  pair.\n- Labeled graphs (every SimpleGraph on Fin n) for n = 3 (8 graphs) and n = 4 (64 graphs):\n  20 and 556 hypomorphic ordered pairs respectively, including 12 and 492 pairs of\n  *distinct* labeled graphs. The Lean conclusion and the English conclusion held in every\n  case.\n\n## Vacuity and triviality\n\n- The hypothesis is satisfiable: `Hypomorphic G G` holds (anchor), and there are many\n  hypomorphic pairs of distinct labeled graphs (above). Hypomorphic pairs at n = 3..6:\n  4, 11, 34 and 156 (one per isomorphism class, as McKay predicts).\n- `3 ≤ n` is necessary and present. At n = 2, K₂ and 2K₁ are hypomorphic, but their degree\n  multisets {1,1} and {0,0} differ, so dropping the bound would make the statement false.\n- The statement is not trivially true. The conclusion is a real constraint (σ must match\n  degrees), and the hypothesis quantifies over the cards. It is not about labeled equality.\n\n## Other failure modes checked\n\n- Quantifiers: ∀ n, ∀ G H, hypothesis → ∃ σ, ∀ v. The order and scope match the English.\n- The σ in the conclusion is fresh, not the hypomorphism σ. This matches the English (\"some\n  bijection\") and is the weaker, correct notion of \"same degree sequence\" (multiset\n  equality). It is not \"the hypomorphism preserves degrees\". That also holds (Kelly), but it\n  is not what the English says.\n- `Fin n` on both sides, the same n: fine. `ncard` of `neighborSet` on the finite type\n  Fin n is the degree, so no infinite-set or ncard = 0 coercion issue arises.\n- ≤ against <: `3 ≤ n` matches \"at least 3\".\n\nScript: the predicates and search are reproduced in the run summary. Runtime is about 2.5 min.\n",
+      "sha256": "fdb95f96ebae0c39289d4ecea16280e03cd42c954aae55143c056f4aba6fc362",
+      "at": "2026-11-25T13:25:51+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "kelly_degree_sequence_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_kelly_degree_sequence.lean",
+    "sha256": "a3e2bbdb6b0298b2863ee6f752aadb865c9745c37facf16f9571b3c74810c722",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T13:45:59+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "fdb95f96ebae0c39289d4ecea16280e03cd42c954aae55143c056f4aba6fc362",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T13:44:59+00:00"
+}
