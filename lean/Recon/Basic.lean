@@ -93,4 +93,100 @@ theorem anchor_three_vertices_not_hypomorphic :
     simp [card]
   exact (e.map_rel_iff.mpr h).elim
 
+/-! ## Edge reconstruction
+
+An *edge card* is the edge-deleted subgraph `G - e`, keeping every vertex. As for vertex
+cards, the edge deck is never built as a multiset of isomorphism classes: two graphs have the
+same edge deck (are *edge-hypomorphic*) iff some bijection of edge sets matches every edge
+card with an isomorphic edge card. -/
+
+/-- The edge card `G - e`: `G` with the single edge `e` deleted; every vertex is kept. -/
+abbrev edgeCard (G : SimpleGraph V) (e : Sym2 V) : SimpleGraph V := G.deleteEdges {e}
+
+/-- `G` and `H` are edge-hypomorphic (have the same edge deck): a bijection `σ` of the edge sets
+matches every edge card `G - e` with an isomorphic edge card `H - σ e`. -/
+def EdgeHypomorphic (G : SimpleGraph V) (H : SimpleGraph W) : Prop :=
+  ∃ σ : G.edgeSet ≃ H.edgeSet, ∀ e : G.edgeSet, Nonempty (edgeCard G e ≃g edgeCard H (σ e))
+
+/-- `G` on `Fin n` is edge-reconstructible: every graph with the same edge deck is isomorphic
+to it. -/
+def EdgeReconstructible {n : ℕ} (G : SimpleGraph (Fin n)) : Prop :=
+  ∀ H : SimpleGraph (Fin n), EdgeHypomorphic G H → Nonempty (G ≃g H)
+
+/-- Harary's edge reconstruction conjecture: every graph with at least four edges is
+edge-reconstructible. -/
+def EdgeReconstructionConjecture : Prop :=
+  ∀ n : ℕ, ∀ G : SimpleGraph (Fin n), 4 ≤ G.edgeSet.ncard → EdgeReconstructible G
+
+/-! ## Edge definition anchors
+
+These pin the edge definitions down: a definition of `EdgeHypomorphic` that was always true,
+always false, or ignored the edge cards would break one of them. -/
+
+/-- Anchor: `EdgeHypomorphic` is reflexive. -/
+theorem anchor_edge_hypomorphic_refl (G : SimpleGraph V) : EdgeHypomorphic G G :=
+  ⟨Equiv.refl _, fun _ => ⟨Iso.refl⟩⟩
+
+/-- The star `K_{1,3}` on `Fin 4`, with centre `0`. -/
+abbrev anchorStar : SimpleGraph (Fin 4) where
+  Adj a b := (a = 0 ∧ b ≠ 0) ∨ (b = 0 ∧ a ≠ 0)
+  symm := ⟨fun _ _ h => h.symm⟩
+  loopless := ⟨fun _ h => by rcases h with h | h <;> exact h.2 h.1⟩
+
+/-- The triangle on `{0, 1, 2}` plus the isolated vertex `3` (`K_3 + K_1`) on `Fin 4`. -/
+abbrev anchorTriangle : SimpleGraph (Fin 4) where
+  Adj a b := a ≠ b ∧ a ≠ 3 ∧ b ≠ 3
+  symm := ⟨fun _ _ h => ⟨h.1.symm, h.2.2, h.2.1⟩⟩
+  loopless := ⟨fun _ h => h.1 rfl⟩
+
+/-- The path `0 - 1 - 2 - 3` (`P_4`) on `Fin 4`. -/
+abbrev anchorPath : SimpleGraph (Fin 4) where
+  Adj a b := a.val + 1 = b.val ∨ b.val + 1 = a.val
+  symm := ⟨fun _ _ h => h.symm⟩
+  loopless := ⟨fun _ h => by rcases h with h | h <;> omega⟩
+
+/-- Every edge card of the star is isomorphic to the matching edge card of `K_3 + K_1` under
+the edge bijection swapping `s(0,3)` and `s(1,2)` (both are `P_3 + K_1`). -/
+theorem anchor_edge_star_triangle_cards : ∀ e : Sym2 (Fin 4), e ∈ anchorStar.edgeSet →
+    ∃ p : Equiv.Perm (Fin 4), ∀ a b, (edgeCard anchorTriangle (Equiv.swap s(0,3) s(1,2) e)).Adj
+      (p a) (p b) ↔ (edgeCard anchorStar e).Adj a b := by decide
+
+/-- Anchor: `K_{1,3}` and `K_3 + K_1` have the same edge deck (every edge card is
+`P_3 + K_1`). -/
+theorem anchor_edge_star_triangle_hypomorphic : EdgeHypomorphic anchorStar anchorTriangle := by
+  refine ⟨Equiv.subtypeEquiv (Equiv.swap s(0,3) s(1,2)) (by decide), fun e => ?_⟩
+  obtain ⟨p, hp⟩ := anchor_edge_star_triangle_cards e.1 e.2
+  exact ⟨⟨p, hp _ _⟩⟩
+
+/-- Anchor: `K_{1,3}` and `K_3 + K_1` are not isomorphic (`3` is isolated in `K_3 + K_1`,
+no vertex is isolated in the star), so edge reconstruction needs a lower bound on the edge
+count. -/
+theorem anchor_edge_star_triangle_not_iso : ¬ Nonempty (anchorStar ≃g anchorTriangle) := by
+  rintro ⟨f⟩
+  have hnb : ∀ x : Fin 4, ∃ y, anchorStar.Adj x y := by decide
+  obtain ⟨y, hy⟩ := hnb (f.symm 3)
+  have h := f.map_rel_iff.mpr hy
+  rw [RelIso.apply_symm_apply] at h
+  exact h.2.1 rfl
+
+/-- Anchor: the star and `K_3 + K_1` have 3 edges, just below the `4 ≤` threshold of
+`EdgeReconstructionConjecture`. -/
+theorem anchor_edge_card_count :
+    anchorStar.edgeSet.ncard = 3 ∧ anchorTriangle.edgeSet.ncard = 3 := by
+  constructor <;> rw [← SimpleGraph.coe_edgeFinset, Set.ncard_coe_finset] <;> decide
+
+/-- No edge card of the star (`P_3 + K_1`) is isomorphic to the middle edge card of `P_4`
+(`2 K_2`). -/
+theorem anchor_edge_path_star_cards : ∀ e : Sym2 (Fin 4), e ∈ anchorStar.edgeSet →
+    ∀ p : Equiv.Perm (Fin 4), ¬ ∀ a b, (edgeCard anchorStar e).Adj (p a) (p b) ↔
+      (edgeCard anchorPath s(1,2)).Adj a b := by decide
+
+/-- Anchor: `P_4` and `K_{1,3}` both have 3 edges but different edge decks, so
+`EdgeHypomorphic` looks at the edge cards, not just at the number of edges. -/
+theorem anchor_edge_path_star_not_hypomorphic : ¬ EdgeHypomorphic anchorPath anchorStar := by
+  rintro ⟨σ, hσ⟩
+  obtain ⟨f⟩ := hσ ⟨s(1,2), by decide⟩
+  exact anchor_edge_path_star_cards (σ ⟨s(1,2), by decide⟩).1 (σ ⟨s(1,2), by decide⟩).2
+    f.toEquiv (fun _ _ => f.map_rel_iff)
+
 end Recon
