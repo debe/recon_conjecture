@@ -116,16 +116,20 @@ def open_pr(gh: GitHub, branch: str, title: str, body: str) -> dict:
     return pr
 
 
-def wait_ci(gh: GitHub, sha: str) -> dict:
-    deadline = time.time() + CI_TIMEOUT
+def latest_run(gh: GitHub, sha: str) -> dict | None:
+    runs = gh.api(f"commits/{sha}/check-runs?check_name={CHECK}").get("check_runs", [])
+    return max(runs, key=lambda r: r["id"]) if runs else None   # the newest run wins
+
+
+def wait_ci(gh: GitHub, sha: str, after_id: int = 0, timeout: int = CI_TIMEOUT) -> dict | None:
+    """The newest completed gate run on `sha` with an id above `after_id`, or None on timeout."""
+    deadline = time.time() + timeout
     while time.time() < deadline:
-        runs = gh.api(f"commits/{sha}/check-runs?check_name={CHECK}").get("check_runs", [])
-        if runs:
-            run = max(runs, key=lambda r: r["id"])   # a re-run (e.g. after labelling) wins
-            if run["status"] == "completed":
-                return run
+        run = latest_run(gh, sha)
+        if run and run["id"] > after_id and run["status"] == "completed":
+            return run
         time.sleep(POLL)
-    raise ShipError(f"CI did not finish within {CI_TIMEOUT // 60} minutes on {sha[:7]}")
+    return None
 
 
 def failure_report(gh: GitHub, run: dict, pr: dict) -> str:
@@ -156,7 +160,16 @@ def ship(gh: GitHub, pr: dict, merge: bool) -> int:
     for _ in range(MAX_UPDATES):
         sha = gh.api(f"pulls/{number}")["head"]["sha"]
         print(f"waiting for CI ({CHECK}) on {sha[:7]} ...", flush=True)
-        run = wait_ci(gh, sha)
+        last = latest_run(gh, sha)
+        if last and last["status"] == "completed" and last["conclusion"] != "success":
+            # Shipping again after a failure: only a newer run (after a label, or a re-run) can
+            # change the verdict, so wait a while for one before repeating the old report.
+            print("the last CI run failed; waiting for a newer one (after a label or a re-run)", flush=True)
+            run = wait_ci(gh, sha, after_id=last["id"], timeout=10 * 60) or last
+        else:
+            run = wait_ci(gh, sha)
+        if run is None:
+            raise ShipError(f"CI did not finish within {CI_TIMEOUT // 60} minutes on {sha[:7]}")
         if run["conclusion"] != "success":
             raise ShipError(failure_report(gh, run, pr))
         print("CI green")
