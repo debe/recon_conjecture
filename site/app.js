@@ -12,7 +12,19 @@ const S = {
   programs: [], steps: new Map(), leases: new Map(), pending: new Map(), agents: new Map(),
   seen: new Map(), ci: [], graveyard: [], ticker: [], fx: [], lastSeq: 0, snapshotAt: 0,
   live: false, ledgerEvents: [],
+  snapLeases: null,   // leases on origin when the snapshot was built; null until it loads
 };
+
+// A lease event older than the snapshot, for a step the snapshot shows unleased, was released
+// since (or never backed by a ref): the relay replays history, the snapshot read the refs.
+function staleLease(sid, t) {
+  return S.snapLeases !== null && t < S.snapshotAt && !(sid in S.snapLeases);
+}
+
+// A live status change shows until main catches up with it; an older event replayed for a
+// step that main has since moved past is history, not news.
+const RANK = { proposed: 0, frozen: 1, reduced: 2, checked: 3, refuted: 3, withdrawn: 3 };
+function ahead(live, main) { return !!live && (RANK[live] ?? -1) > (RANK[main] ?? -1); }
 let L = { nodes: new Map(), regions: [], w: 600, h: 400, graveY: 0 };
 const view = { x: 24, y: 24, k: 1, fitted: false };
 const canvas = document.getElementById("map");
@@ -130,7 +142,7 @@ function draw() {
     ctx.fillStyle = color(s.status);
     ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 2 * Math.PI); ctx.fill();
     const pend = S.pending.get(id);
-    if (pend && pend !== s.status) {
+    if (ahead(pend, s.status)) {
       ctx.strokeStyle = color(pend); ctx.lineWidth = 2.5; ctx.setLineDash([3, 3]);
       ctx.beginPath(); ctx.arc(p.x, p.y, R + 9, (t / 900) % (2 * Math.PI), (t / 900) % (2 * Math.PI) + 2 * Math.PI);
       ctx.stroke(); ctx.setLineDash([]);
@@ -138,7 +150,7 @@ function draw() {
     ctx.fillStyle = ink; ctx.font = `600 11px ${font}`; ctx.textAlign = "center";
     ctx.fillText(id, p.x, p.y + R + 18);
     ctx.fillStyle = muted; ctx.font = `11px ${font}`;
-    ctx.fillText(clip(s.title || "", 18) + (pend && pend !== s.status ? ` (${pend}, awaiting CI)` : ""),
+    ctx.fillText(clip(s.title || "", 18) + (ahead(pend, s.status) ? ` (${pend}, unmerged)` : ""),
       p.x, p.y + R + 32);
     ctx.textAlign = "left";
 
@@ -286,8 +298,8 @@ function openDrawer(id) {
     lease && Date.parse(lease.expires) > Date.now()
       ? el("p", {}, `Leased by ${lease.holder} until ${new Date(lease.expires).toLocaleTimeString()}`
         + (lease.note ? ` — ${lease.note}` : "")) : null,
-    S.pending.get(id) && S.pending.get(id) !== s.status
-      ? el("p", {}, `Live: ${S.pending.get(id)} on a branch, awaiting CI and merge.`) : null,
+    ahead(S.pending.get(id), s.status)
+      ? el("p", {}, `Live: ${S.pending.get(id)} on someone's machine. It counts once a pull request with it passes CI and merges into main.`) : null,
     el("p", {}, s.statement_en || ""),
     el("pre", {}, s.statement_lean || ""),
     el("p", {}, el("a", { href: gh(s.statement_file), target: "_blank", rel: "noopener" }, "frozen statement"),
@@ -378,11 +390,10 @@ function apply(env) {
   const e = env.event, step = e.step;
   const t = Date.parse(e.ts) || env.received_ms;
   const fresh = env.received_ms > LOADED_AT - 1500;
-  const afterSnapshot = t > S.snapshotAt;
   switch (e.kind) {
     case "leased": case "beat":
-      if (step) S.leases.set(step, {
-        holder: e.actor, note: e.note || (S.leases.get(step) || {}).note,
+      if (step && !staleLease(step, t)) S.leases.set(step, {
+        holder: e.actor, note: e.note || (S.leases.get(step) || {}).note, t,
         expires: e.expires || new Date(t + (e.minutes || 120) * 60e3).toISOString(), beat: fresh ? Date.now() : 0,
       });
       break;
@@ -401,7 +412,7 @@ function apply(env) {
       if (fresh) fx(step, e.verdict === "ACCEPTED" ? "burst" : "bad");
       break;
     case "proposed": case "frozen": case "checked": case "refuted": case "reduced":
-      if (step && afterSnapshot) {
+      if (step) {
         if (!S.steps.has(step) && e.kind === "proposed") {
           S.steps.set(step, { id: step, program: step.split("_")[0], title: e.title || step, status: "proposed", children: [], reductions: [] });
           computeLayout();
@@ -430,10 +441,12 @@ async function loadSnapshot() {
     S.snapshotAt = Date.parse(d.generated_at) || 0;
     for (const [sid, st] of [...S.pending]) {
       const s = S.steps.get(sid);
-      if (s && s.status === st) S.pending.delete(sid);
+      if (s && !ahead(st, s.status)) S.pending.delete(sid);
     }
-    for (const [sid, l] of Object.entries(d.leases || {})) {
-      if (!S.leases.has(sid) && Date.parse(l.expires) > Date.now()) S.leases.set(sid, { ...l, beat: 0 });
+    S.snapLeases = d.leases || {};
+    for (const [sid, l] of [...S.leases]) if (staleLease(sid, l.t || 0)) S.leases.delete(sid);
+    for (const [sid, l] of Object.entries(S.snapLeases)) {
+      if (!S.leases.has(sid) && Date.parse(l.expires) > Date.now()) S.leases.set(sid, { ...l, t: S.snapshotAt, beat: 0 });
     }
     S.ledgerEvents = (d.events || []).slice(-150).reverse().map(e => ({ e, t: Date.parse(e.ts) || 0 }));
     if (!S.graveyard.length) {
