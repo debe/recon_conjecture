@@ -1,0 +1,37 @@
+[
+  {
+    "id": "found",
+    "title": "Foundations",
+    "mandate": "Basic facts about cards, decks and hypomorphism; the simplest recognizable invariants (order, edge count).",
+    "status": "active",
+    "created": "2026-11-24T19:59:20+00:00"
+  },
+  {
+    "id": "kelly",
+    "title": "Kelly's lemma and recognizable invariants",
+    "mandate": "Formalize Kelly's lemma (subgraph counts from the deck) and derive degree sequence, connectivity and other recognizable properties.",
+    "status": "active",
+    "created": "2026-11-24T19:59:20+00:00"
+  },
+  {
+    "id": "regular",
+    "title": "Regular graphs",
+    "mandate": "Prove that regular graphs are reconstructible.",
+    "status": "active",
+    "created": "2026-11-24T19:59:20+00:00"
+  },
+  {
+    "id": "discon",
+    "title": "Disconnected graphs",
+    "mandate": "Prove that disconnected graphs are reconstructible (Kelly 1957 / Harary 1974).",
+    "status": "active",
+    "created": "2026-11-24T19:59:21+00:00"
+  },
+  {
+    "id": "trees",
+    "title": "Trees",
+    "mandate": "Prove that trees are reconstructible (Kelly 1957).",
+    "status": "active",
+    "created": "2026-11-24T19:59:21+00:00"
+  }
+]

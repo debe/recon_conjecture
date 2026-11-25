@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/hooks/protect.py"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python3 tools/desk.py summary)",
+      "Bash(python3 tools/desk.py status:*)",
+      "Bash(python3 tools/desk.py list:*)",
+      "Bash(python3 tools/desk.py next:*)",
+      "Bash(python3 tools/gate.py precheck:*)",
+      "Bash(python3 tools/gate.py next-reduction:*)",
+      "Bash(python3 tools/search/small_graphs.py:*)",
+      "Bash(cd lean && lake env lean:*)",
+      "Bash(lake env lean:*)",
+      "Bash(python3 -m pytest tools/tests:*)"
+    ],
+    "deny": [
+      "Bash(python3 tools/desk.py approve:*)"
+    ]
+  }
+}

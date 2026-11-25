@@ -1,0 +1,8 @@
+lean/.lake/
+lean/.gate/
+lean/Recon/Scratch/
+ledger/.lock
+__pycache__/
+.pytest_cache/
+*.json.tmp
+.claude/settings.local.json

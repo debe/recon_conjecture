@@ -1,0 +1,11 @@
+name = "Recon"
+defaultTargets = ["Recon"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.36.0"
+
+[[lean_lib]]
+name = "Recon"
+globs = ["Recon.Basic", "Recon.Statements.+", "Recon.Checked.+"]
