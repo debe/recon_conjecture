@@ -13,6 +13,9 @@
   --withdrawn: #c9c6bd;
   --lease: #e3a008;
   --accent: #2f6fdb;
+  --role-builder: #2f6fdb; --role-thinker: #7a4fd0; --role-red-team: #d4572a;
+  --role-fidelity-reviewer: #0f8b8d; --role-librarian: #b7791f; --role-strategist: #1d1f24;
+  --role-other: #9aa0a8;
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
@@ -23,6 +26,9 @@
     --region: #181b20; --proposed: #7b818b; --frozen: #5b93f0; --reduced: #a27ef0;
     --checked: #3cc47a; --refuted: #f07a4c; --withdrawn: #3a3e46; --lease: #f2b938;
     --accent: #5b93f0; color-scheme: dark;
+    --role-builder: #5b93f0; --role-thinker: #a27ef0; --role-red-team: #f07a4c;
+    --role-fidelity-reviewer: #3bb8ba; --role-librarian: #e0a840; --role-strategist: #e8e6e1;
+    --role-other: #7b818b;
   }
 }
 :root[data-theme="dark"] {
@@ -30,6 +36,9 @@
   --region: #181b20; --proposed: #7b818b; --frozen: #5b93f0; --reduced: #a27ef0;
   --checked: #3cc47a; --refuted: #f07a4c; --withdrawn: #3a3e46; --lease: #f2b938;
   --accent: #5b93f0; color-scheme: dark;
+  --role-builder: #5b93f0; --role-thinker: #a27ef0; --role-red-team: #f07a4c;
+  --role-fidelity-reviewer: #3bb8ba; --role-librarian: #e0a840; --role-strategist: #e8e6e1;
+  --role-other: #7b818b;
 }
 
 * { box-sizing: border-box; }
@@ -63,6 +72,8 @@ canvas#map.dragging { cursor: grabbing; }
 }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend .role i { width: 8px; height: 8px; }
+.legend .sep { color: var(--line); }
 .hint { position: absolute; right: 12px; bottom: 10px; color: var(--muted); font-size: 12px; }
 
 aside {
@@ -84,6 +95,21 @@ h2 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing
 .presence li { display: flex; gap: 8px; align-items: baseline; font-size: 13px; }
 .presence .who { font-weight: 600; }
 .presence .what { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fleet-panel { max-height: 42vh; overflow-y: auto; }
+.fleet { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.agent {
+  display: grid; grid-template-columns: 10px 1fr; gap: 8px; align-items: start;
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--bg);
+}
+.agent .role { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; }
+.agent .body { min-width: 0; }
+.agent .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.agent .name { font: 600 12px/1.4 var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agent .t { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.agent .doing { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agent .step { color: var(--ink); cursor: pointer; }
+.agent .step:hover { text-decoration: underline; }
+.list li.empty { display: block; }
 .empty { color: var(--muted); font-size: 13px; }
 a { color: var(--accent); }
 

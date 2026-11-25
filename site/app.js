@@ -9,7 +9,7 @@ const LOADED_AT = Date.now();
 const STATUSES = ["proposed", "frozen", "reduced", "checked", "refuted", "withdrawn"];
 
 const S = {
-  programs: [], steps: new Map(), leases: new Map(), pending: new Map(), agents: new Map(),
+  programs: [], steps: new Map(), leases: new Map(), pending: new Map(), agents: new Map(), stopped: new Set(), fidelity: new Map(),
   seen: new Map(), ci: [], graveyard: [], ticker: [], fx: [], lastSeq: 0, snapshotAt: 0,
   live: false, ledgerEvents: [],
   snapLeases: null,   // leases on origin when the snapshot was built; null until it loads
@@ -36,7 +36,21 @@ const who = actor => (actor || "?").split("/")[0];
 
 // ------------------------------------------------------------------ layout
 
-const R = 15, DX = 112, DY = 92, PAD = 40, GAP = 36, HEAD = 46;
+const R = 15, DX = 156, DY = 104, PAD = 40, GAP = 36, HEAD = 46;
+const ID_LINE = 22;   // characters per line of a step id under its node
+
+// Step ids are long snake_case names: break them at underscores into lines of at most ID_LINE
+// characters, so neighbouring labels never run into each other.
+function wrapId(id) {
+  const lines = [];
+  let cur = "";
+  for (const part of id.split("_")) {
+    const next = cur ? cur + "_" + part : part;
+    if (cur && next.length > ID_LINE) { lines.push(cur + "_"); cur = part; } else cur = next;
+  }
+  lines.push(cur);
+  return lines.length > 2 ? [lines[0], clip(lines.slice(1).join(""), ID_LINE)] : lines;
+}
 
 function kids(id) {
   const s = S.steps.get(id);
@@ -55,7 +69,7 @@ function computeLayout() {
   let y = 0;
   const place = (id, x0, d, top) => {
     // +40: room for a lease chip above the first row without covering the program title
-    nodes.set(id, { x: x0 + span(id) * DX / 2, y: top + HEAD + 40 + d * DY });
+    nodes.set(id, { x: x0 + span(id) * DX / 2, y: top + HEAD + 52 + d * DY });
     let x = x0;
     for (const c of kids(id)) { place(c, x, d + 1, top); x += span(c) * DX; }
   };
@@ -67,7 +81,7 @@ function computeLayout() {
     const d = roots.length ? Math.max(...roots.map(depth)) : 0;
     let x = PAD;
     for (const r of roots) { place(r, x, 0, y); x += span(r) * DX; }
-    const h = HEAD + (d ? d * DY + 44 : 26);
+    const h = HEAD + (d ? d * DY + 62 : 26);
     regions.push({ p, y, h, w: Math.max(3, w) * DX + 2 * PAD, n: roots.length });
     y += h + GAP;
   }
@@ -148,11 +162,24 @@ function draw() {
       ctx.stroke(); ctx.setLineDash([]);
     }
     ctx.fillStyle = ink; ctx.font = `600 11px ${font}`; ctx.textAlign = "center";
-    ctx.fillText(id, p.x, p.y + R + 18);
+    const idLines = wrapId(id);
+    idLines.forEach((ln, i) => ctx.fillText(ln, p.x, p.y + R + 18 + i * 13));
     ctx.fillStyle = muted; ctx.font = `11px ${font}`;
-    ctx.fillText(clip(s.title || "", 18) + (ahead(pend, s.status) ? ` (${pend}, unmerged)` : ""),
-      p.x, p.y + R + 32);
+    ctx.fillText(clip(s.title || "", 24) + (ahead(pend, s.status) ? ` (${pend}, unmerged)` : ""),
+      p.x, p.y + R + 32 + (idLines.length - 1) * 13);
     ctx.textAlign = "left";
+
+    // the agents working on this step sit on an arc above it, one breathing dot per agent in
+    // its role's colour (above, so they never cover the label underneath)
+    const crew = agentsOn(id);
+    const spread = Math.min(Math.PI * 0.9, crew.length * 0.42);
+    crew.forEach((a, i) => {
+      const ang = -Math.PI / 2 + (crew.length > 1 ? -spread / 2 + spread * i / (crew.length - 1) : 0);
+      const ax = p.x + Math.cos(ang) * (R + 13), ay = p.y + Math.sin(ang) * (R + 13);
+      const r = 4.5 + 0.8 * Math.sin(t / 420 + i * 1.7);
+      ctx.fillStyle = roleColor(a.role); ctx.strokeStyle = cssVar("--surface"); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(ax, ay, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+    });
 
     const lease = S.leases.get(id);
     if (lease && Date.parse(lease.expires) > now) {
@@ -168,9 +195,9 @@ function draw() {
       const w = ctx.measureText(label).width + 16;
       const cx = Math.min(Math.max(p.x, w / 2 + 6), L.w - w / 2 - 6);   // keep inside the map
       ctx.fillStyle = cssVar("--lease");
-      roundRect(cx - w / 2, p.y - R - 30, w, 20, 10); ctx.fill();
+      roundRect(cx - w / 2, p.y - R - 42, w, 20, 10); ctx.fill();   // clear of the agent orbit
       ctx.fillStyle = "#1d1f24"; ctx.textAlign = "center";
-      ctx.fillText(label, cx, p.y - R - 16); ctx.textAlign = "left";
+      ctx.fillText(label, cx, p.y - R - 28); ctx.textAlign = "left";
     }
   }
 
@@ -288,26 +315,30 @@ function openDrawer(id) {
   const body = $("drawer-body");
   body.replaceChildren();
   const lease = S.leases.get(id);
-  body.append(
+  // a step seen only in live events (proposed on someone's machine) has no record on main yet
+  const liveOnly = !s.statement_file;
+  body.append(...[
     el("h3", {}, s.title || id),
     el("div", { class: "meta" },
       el("span", { class: "pill", style: `background:${color(s.status)}` }, s.status), "  ",
       id, s.parent ? ` · child of ${s.parent}` : " · root",
       s.approved_by ? ` · approved by ${s.approved_by}` : "",
-      ` · fidelity passes ${s.fidelity_passes ?? 0}`),
+      ` · fidelity passes ${Math.max(s.fidelity_passes ?? 0, (S.fidelity.get(id) || new Set()).size)}`),
     lease && Date.parse(lease.expires) > Date.now()
       ? el("p", {}, `Leased by ${lease.holder} until ${new Date(lease.expires).toLocaleTimeString()}`
         + (lease.note ? ` — ${lease.note}` : "")) : null,
     ahead(S.pending.get(id), s.status)
       ? el("p", {}, `Live: ${S.pending.get(id)} on someone's machine. It counts once a pull request with it passes CI and merges into main.`) : null,
-    el("p", {}, s.statement_en || ""),
-    el("pre", {}, s.statement_lean || ""),
-    el("p", {}, el("a", { href: gh(s.statement_file), target: "_blank", rel: "noopener" }, "frozen statement"),
+    liveOnly ? el("p", { class: "empty" }, "Proposed on someone's machine. The statement shows here once its pull request merges into main.") : null,
+    s.statement_en ? el("p", {}, s.statement_en) : null,
+    s.statement_lean ? el("pre", {}, s.statement_lean) : null,
+    liveOnly ? null : el("p", {}, el("a", { href: gh(s.statement_file), target: "_blank", rel: "noopener" }, s.status === "proposed" ? "statement" : "frozen statement"),
       s.checked ? " · " : "", s.checked ? el("a", { href: gh(s.checked.file), target: "_blank", rel: "noopener" }, "checked proof") : null,
       s.refuted ? " · " : "", s.refuted ? el("a", { href: gh(s.refuted.file), target: "_blank", rel: "noopener" }, "refutation") : null),
     (s.dead_ends || []).length ? el("p", {}, `Dead ends (${s.dead_ends.length}): `
       + s.dead_ends.slice(-3).map(d => `${d.reason}: ${d.approach}`).join(" · ")) : null,
-  );
+    agentsOn(id).length ? el("p", {}, `Agents on it now: ${agentsOn(id).map(agentName).join(", ")}`) : null,
+  ].filter(x => x != null));
   $("drawer").hidden = false;
 }
 $("drawer-close").addEventListener("click", () => ($("drawer").hidden = true));
@@ -359,7 +390,11 @@ function renderPanels() {
     if (!people.has(h)) people.set(h, { t: l.beat || 0, what: l.note || "", leases: 0, agents: 0 });
     people.get(h).leases++;
   }
-  for (const a of S.agents.values()) if (people.has(who(a.actor))) people.get(who(a.actor)).agents++;
+  for (const a of liveAgents()) {
+    const h = who(a.actor);
+    if (!people.has(h)) people.set(h, { t: a.t, what: "", leases: 0, agents: 0 });
+    people.get(h).agents++;
+  }
   $("presence").replaceChildren(...(people.size ? [...people].map(([h, v]) => el("li", {},
     el("span", { class: "who" }, h),
     el("span", { class: "what" }, `${v.leases} lease${v.leases === 1 ? "" : "s"} · ${v.agents} agent${v.agents === 1 ? "" : "s"}${v.what ? " · " + v.what : ""}`)))
@@ -369,6 +404,7 @@ function renderPanels() {
     el("span", {}, el("span", { class: "k " + (c.result === "success" ? "ok" : "bad") }, c.result || "?"), " ",
       c.url ? el("a", { href: c.url, target: "_blank", rel: "noopener" }, `PR #${c.pr ?? "?"}`) : `PR #${c.pr ?? "?"}`,
       c.sha ? ` · ${String(c.sha).slice(0, 7)}` : ""))) : [el("li", { class: "empty" }, "no CI runs seen yet")]));
+  renderFleet();
   const steps = [...S.steps.values()];
   const n = st => steps.filter(s => s.status === st).length;
   $("counts").textContent = `${n("checked")} checked · ${n("refuted")} refuted · ${n("frozen")} open · ${steps.length} steps`;
@@ -377,12 +413,61 @@ setInterval(() => { panelsDirty = true; renderPanels(); }, 15000);
 
 function legend() {
   $("legend").replaceChildren(...STATUSES.map(s => el("span", {}, el("i", { style: `background:${color(s)}` }), s)),
-    el("span", {}, el("i", { style: `background:${cssVar("--lease")}` }), "leased"));
+    el("span", {}, el("i", { style: `background:${cssVar("--lease")}` }), "leased"),
+    el("span", { class: "sep" }, "|"),
+    ...ROLES.map(r => el("span", { class: "role" }, el("i", { style: `background:${roleColor(r)}` }), r)));
 }
 
 // ------------------------------------------------------------------ data
 
 function fx(step, type) { S.fx.push({ step, type, t0: performance.now() }); }
+
+// ------------------------------------------------------------------ agents
+// The hook sends agent_start/agent_stop with the workflow label (`builder:<step>:b1`,
+// `fid-testing:<step>`, or a free description). Desk and gate events carry the actor
+// `<handle>/<label>`: matching that label and the step to a running agent shows what it is doing.
+
+const AGENT_TTL = 4 * 3600e3;   // an agent with no stop event after this long is presumed gone
+const ROLES = ["builder", "thinker", "red-team", "fidelity-reviewer", "librarian", "strategist"];
+const roleColor = r => cssVar("--role-" + (ROLES.includes(r) ? r : "other"));
+const segs = a => a.label.split(":").filter(x => x && x !== a.step);
+const agentName = a => segs(a).join(" · ") || a.role;
+const liveAgents = () => [...S.agents.values()].filter(a => Date.now() - a.t < AGENT_TTL);
+const agentsOn = id => liveAgents().filter(a => a.step === id);
+
+function attribute(e, t) {
+  if (!e.actor || !e.step) return;
+  const [h, lab] = e.actor.split("/");
+  const mine = liveAgents().filter(a => a.step === e.step && who(a.actor) === h);
+  const hit = mine.filter(a => segs(a).includes(lab));
+  const a = hit.length ? hit[0] : mine.length === 1 ? mine[0] : null;
+  if (a && t >= a.t) { a.act = describe(e); a.actT = t; }
+}
+
+const ago = ms => {
+  const m = Math.max(0, Math.round((Date.now() - ms) / 60e3));
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`;
+};
+
+function renderFleet() {
+  const agents = liveAgents().sort((a, b) => a.t - b.t);
+  $("fleet-count").textContent = agents.length ? `· ${agents.length}` : "";
+  $("fleet").replaceChildren(...(agents.length ? agents.map(a => el("li", { class: "agent" },
+    el("i", { class: "role", style: `background:${roleColor(a.role)}` }),
+    el("div", { class: "body" },
+      el("div", { class: "top" },
+        el("span", { class: "name", title: a.label }, agentName(a)),
+        el("span", { class: "t" }, ago(a.t))),
+      el("div", { class: "t" }, `${who(a.actor)} · ${a.role}${a.phase ? " · " + a.phase : ""}`),
+      el("div", { class: "doing" },
+        a.step ? el("span", { class: "k step", "data-step": a.step }, a.step) : null,
+        a.step && a.act ? " · " : "",
+        a.act || (a.step ? "" : "working"))))) : [el("li", { class: "empty" }, "no agents running")]));
+}
+document.addEventListener("click", ev => {
+  const s = ev.target.closest && ev.target.closest("[data-step]");
+  if (s && S.steps.has(s.dataset.step)) openDrawer(s.dataset.step);
+});
 
 function apply(env) {
   if (!env || !env.event || env.seq <= S.lastSeq) return;
@@ -421,11 +506,24 @@ function apply(env) {
       }
       if (e.kind === "checked" || e.kind === "refuted") S.leases.delete(step);
       break;
-    case "agent_start": S.agents.set(`${e.actor}#${e.agent_id || ""}`, { actor: e.actor, t }); break;
-    case "agent_stop": S.agents.delete(`${e.actor}#${e.agent_id || ""}`); break;
+    case "agent_start": {
+      const id = e.agent_id || `${e.actor}#${t}`;
+      if (S.stopped.has(id) || Date.now() - t > AGENT_TTL) break;
+      S.agents.set(id, { id, actor: e.actor, role: e.agent_type || "agent", label: e.label || "",
+        step: step || null, phase: e.phase || "", t, act: "", actT: 0 });
+      break;
+    }
+    case "agent_stop": S.stopped.add(e.agent_id); S.agents.delete(e.agent_id); break;
+    case "fidelity":   // distinct reviewers that passed it, until main's record catches up
+      if (step && e.verdict === "pass") {
+        if (!S.fidelity.has(step)) S.fidelity.set(step, new Set());
+        S.fidelity.get(step).add(e.actor);
+      }
+      break;
     case "ci_verdict": S.ci.unshift({ pr: e.pr, result: e.result, sha: e.sha, url: e.url, t }); break;
     case "merged": setTimeout(loadSnapshot, 90e3); break;
   }
+  if (!e.kind.startsWith("agent_")) attribute(e, t);
   if (e.actor && who(e.actor) !== "ci" && env.principal !== "ci") S.seen.set(who(e.actor), { t, what: `${describe(e)}${step ? " · " + step : ""}` });
   S.ticker.unshift({ e, t, fresh });
   if (S.ticker.length > 300) S.ticker.length = 300;
