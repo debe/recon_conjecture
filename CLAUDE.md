@@ -13,7 +13,7 @@ search result, a literature citation or an agent's confident summary is never a 
 
 | Word | Meaning |
 |---|---|
-| **checked** | `tools/gate.py` printed ACCEPTED and the desk records it. Nothing else is a result. |
+| **checked** | the step's record says checked **on `main`**, where CI (`audit.py --clean`) re-verified it. A local `gate.py` ACCEPTED is a *submission*: it counts once its PR is green and merged. |
 | **refuted** | the negated twin `<id>_neg` is checked |
 | **reduced** | a kernel-checked implication `S_children → S_parent` is recorded; the parent is closed when every child is checked |
 | **frozen** | the statement is fixed and open for work |
@@ -114,6 +114,11 @@ Key surveys:
  reducer → children + R-file → gate check-reduction (kernel-checked implication)
 ```
 
+Several humans, each with their own fleet on their own machine, share one library. GitHub is
+the hub: the ledger travels in git, leases are refs on origin, and the authoritative verdict
+is CI on the pull request (`.github/workflows/gate.yml`: `ci_policy.py` + `audit.py --clean`).
+A contributor's machine is never trusted; it only produces files that CI re-verifies.
+
 | Path | Who writes it | Notes |
 |---|---|---|
 | `lean/Recon/Basic.lean` | **human only** | definitions + anchors; see §7 |
@@ -154,8 +159,12 @@ proposed ──(2 fidelity passes + human approve, roots only)──► frozen �
 - **Release reasons:** `hypothesis_too_weak | missing_lemma | statement_seems_false |
   does_not_elaborate | out_of_time | reduced | other`. Do not change a statement; release
   with a reason instead.
-- **Leases** are coordination, not safety. The default lease is 120 minutes, and an
-  expired lease frees itself.
+- **Leases** are coordination, not safety. A lease is the git ref `refs/leases/<id>` on
+  origin, written by compare-and-swap push: when two machines race, exactly one wins.
+  Holders are `<handle>/<label>` (set `git config recon.handle <github-handle>`). The
+  default lease is 120 minutes; renew with `desk.py beat <id> --holder <label> --note
+  "<what you are doing>"` (the note shows on the live page), and an expired lease may be
+  taken over. `desk.py leases` lists them.
 - **Refuted children.** If a child of a reduction is refuted, that reduction dies, its
   sibling children are withdrawn, and the parent re-opens if it has no other live
   reduction.
@@ -170,7 +179,7 @@ proposed ──(2 fidelity passes + human approve, roots only)──► frozen �
 - `approve <id>` (**human only**)
 - `freeze <id>`
 - `next`
-- `lease` / `beat` / `release`
+- `lease` / `beat` / `release` / `leases`
 - `dead-end`
 - `sketch`
 - `program-add`
@@ -248,9 +257,19 @@ The bundle lives at `notes/sketches/<id>/reduction.json`:
 - `tools/{desk,gate,audit}.py`, `tools/hooks/` and `tools/tests/`;
 - `.claude/settings*.json`.
 
-It also blocks agents from running `desk.py approve`. It guards against accidents, not
-against a determined adversary. The backstops are `tools/audit.py` and the human's git
-review.
+It also blocks agents from running `desk.py approve`, setting PR labels, merging PRs and
+pushing to `main`. It guards against accidents, not against a determined adversary. The
+backstops are CI (`audit.py --clean` and `ci_policy.py` on every PR) and the humans' review.
+
+`tools/ci_policy.py` enforces on every PR diff:
+- `Checked/` and `Statements/` are append-only;
+- trusted files (`Basic.lean`, desk, gate, audit, ci_policy, live, hooks, tests, Lake
+  files, `.github/`, `.gitattributes`, `.claude/settings.json`) change only in a PR with the
+  `trusted-change` label, which only maintainers can set;
+- every root step past `proposed` carries `approved_by` from `.github/maintainers.txt`
+  (read from the PR's base, so a PR cannot add its own approver);
+- step records are never deleted and the event log loses no line;
+- no complete reduction is left unassembled (after a rebase: `gate.py assemble <id>`).
 
 Human-only decisions:
 1. **Changing `Basic.lean`.** The definitions decide what every result means. Any change
@@ -259,10 +278,12 @@ Human-only decisions:
    - n = 2 is hypomorphic but not isomorphic;
    - K₃ and its complement are not hypomorphic.
    Changing a definition invalidates every dependent result, so re-run `audit.py --clean`.
-2. **Approving root statements.** Do this after 2 fidelity passes:
-   `! python3 tools/desk.py approve <id>`, then `python3 tools/desk.py freeze <id>`.
-3. **Commits.** Workflows and agents never commit. The human reviews `git diff ledger/
-   lean/Recon/` and commits. No AI attribution in commit messages.
+2. **Approving root statements.** Any maintainer, after 2 fidelity passes:
+   `! python3 tools/desk.py approve <id>` (records `approved_by` = your `recon.handle`),
+   then `python3 tools/desk.py freeze <id>`.
+3. **Commits, PRs and merges.** Workflows and agents never commit, label or merge. The
+   human reviews `git diff ledger/ lean/Recon/`, commits on a branch, opens the PR and
+   merges it once CI is green. No AI attribution in commit messages or PRs.
 4. **Changing the gate, the desk or the toolchain pin.**
 
 ## 8. Workflow catalogue (`.claude/workflows/`)
@@ -286,6 +307,8 @@ rules); a request like "run a campaign round" counts.
 
 ## 9. Operating loop
 
+0. `git pull` on `main`, then a branch `<handle>/round-<n>`. Leases are on origin, so
+   `desk.py next` already skips what other machines are working on.
 1. `python3 tools/desk.py summary`, and read the newest `notes/rounds/*.md`.
 2. If there are no frozen steps:
    - run `librarian` for the program;
@@ -295,7 +318,9 @@ rules); a request like "run a campaign round" counts.
 4. Read the result and the round report. Confirm every claimed check with
    `desk.py status <id>`.
 5. Every few rounds, and always before a commit, run `python3 tools/audit.py`. It must end
-   with AUDIT PASSED.
+   with AUDIT PASSED. Then the human pushes the branch and opens a PR; a result counts once
+   CI is green and the PR is merged. If CI asks for `gate.py assemble <id>` after a rebase,
+   run it and push again.
 6. If a round closes nothing, stop and re-plan: try a different angle, a reduction, a
    smaller statement, or a librarian sweep. Do not repeat the same attack with more agents.
 
@@ -331,10 +356,36 @@ Add a program with `python3 tools/desk.py program-add <id> --title ... --mandate
 - **Searching Mathlib:**
   `grep -rn "theorem .*induce" lean/.lake/packages/mathlib/Mathlib/Combinatorics/SimpleGraph/`.
 - **Small graphs:** `python3 tools/search/small_graphs.py -h`.
-  - It is exhaustive for n ≤ 7 and samples randomly above that.
+  - It is exhaustive for n ≤ 7 (networkx atlas), for n ≤ 10 when nauty's `geng` is installed
+    (`apt install nauty`), and samples randomly above that.
+  - Canonical forms use individualise-and-refine with twin pruning: milliseconds even for
+    vertex-transitive graphs such as Petersen or K5,5.
   - `verify-recon` re-confirms the conjecture for n ≤ 6 as a self-test of the tool.
   - `lean <graph6>` prints a decidable Lean term for a graph.
 - **Tests:** `python3 -m pytest tools/tests -q`. The gate tests compile Lean and take about
   4 minutes. Run them after any change to `tools/`.
 - **Serialization.** The gate holds the ledger lock during a check (minutes), so other desk
-  writes wait. That is fine at this fleet size.
+  writes on the same machine wait. That is fine at this fleet size.
+
+## 12. Working together
+
+| Layer | Carries | Where |
+|---|---|---|
+| **Truth** | statements, checked proofs, ledger | git; a PR counts once CI (`gate.yml`) is green and it is merged |
+| **Coordination** | who works on which step | `refs/leases/<id>` on origin (compare-and-swap, `desk.py lease/beat/release`) |
+| **Live view** | leases, heartbeat notes, prechecks, verdicts, agents, CI | relay `recon.knownhosts.org` → canvas page `debe.github.io/recon_conjecture` |
+| **Knowledge** | lessons from corrections, messages, hand-offs | borg team collective `recon` (optional) |
+
+- **Live view.** `desk.py` and `gate.py` mirror their events to the relay
+  (`tools/live.py`), and a hook reports subagent start/stop. It is best effort and never
+  authoritative: the page starts from a snapshot of `main` and layers live events on top.
+  A machine without `~/.config/recon/live.token` simply sends nothing.
+- **Borg.** Use `borg tell collective "<what you are attacking>"` for intent, and
+  `borg handoff` to pass a stuck builder session to another machine. Borg never carries
+  verdicts or leases.
+- **Splitting work.** Prefer different programs per person; within a program, leases
+  prevent collisions. Small PRs merge fastest and conflict least.
+- **Compared to pequalnp.com.** pequalnp runs a central desk server and a central checker
+  on PRs. Here the desk is git itself (no server to run), the checker is CI, and the only
+  server is the non-authoritative relay.
+- **Onboarding** a new collaborator: `CONTRIBUTING.md`.
