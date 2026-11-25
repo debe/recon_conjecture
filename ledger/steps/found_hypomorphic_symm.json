@@ -1,0 +1,54 @@
+{
+  "id": "found_hypomorphic_symm",
+  "program": "found",
+  "title": "Hypomorphic is symmetric",
+  "statement_en": "For every n and all graphs G, H on Fin n: if G and H are hypomorphic (have the same deck), then H and G are hypomorphic.",
+  "statement_lean": "∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Recon.Hypomorphic G H → Recon.Hypomorphic H G",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_found_hypomorphic_symm.lean",
+  "statement_sha256": "4c56d87126af2d4d5e2d4868f6725bb9f92774d6ae4c656bb6ffe48c634eda77",
+  "status": "checked",
+  "author": "librarian",
+  "created": "2026-11-25T12:27:01+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_symm (lens: back-translation)\n\nReviewer: fid-backtranslate\n\n## Lean statement\n\n    ∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Recon.Hypomorphic G H → Recon.Hypomorphic H G\n\n## My back-translation (written before I compared it with statement_en)\n\nI expanded `Recon.Hypomorphic` and `Recon.card` from `lean/Recon/Basic.lean`:\n- `card G x := G.induce ({x}ᶜ)`, the subgraph of G induced on every vertex except x;\n- `Hypomorphic G H := ∃ σ : V ≃ W, ∀ x, Nonempty (card G x ≃g card H (σ x))`.\n\nReading: \"For every natural number n and all simple graphs G and H on vertex set\nFin n: suppose there is a bijection σ : Fin n → Fin n such that for every vertex x the card\nG − x is isomorphic, as a graph, to the card H − σ(x). Then there is a bijection\nτ : Fin n → Fin n such that for every vertex y the card H − y is isomorphic to the card\nG − τ(y).\"\n\n## Clause-by-clause comparison with statement_en\n\nstatement_en: \"For every n and all graphs G, H on Fin n: if G and H are hypomorphic (have the\nsame deck), then H and G are hypomorphic.\"\n\n| Clause | Lean | Match |\n|---|---|---|\n| \"for every n\" | `∀ (n : ℕ)`; there is no lower bound on n | yes. Symmetry holds for every n, including 0, 1 and 2, so an n ≥ 3 hypothesis is neither needed nor claimed |\n| \"all graphs G, H on Fin n\" | `G H : SimpleGraph (Fin n)`, both on the same Fin n | yes. Simple graphs are the project convention |\n| \"G and H hypomorphic (same deck)\" | `Recon.Hypomorphic G H` | yes. It is the Bondy–Hemminger bijection form of \"same deck\" from the trusted Basic.lean, and the card notion is the induced subgraph on {x}ᶜ |\n| \"then H and G hypomorphic\" | `Recon.Hypomorphic H G`, with the arguments swapped | yes. The arguments sit in the right order |\n\n## Failure-mode checklist\n\n- Quantifier order and scope: all universal and outermost, and the implication is at the right place. OK.\n- Missing or extra hypothesis: none. The English has no n ≥ 3, and the Lean has none either. OK.\n- Fin n against arbitrary types: the English says Fin n and the Lean uses Fin n. The result is a\n  specialization of the general-type fact, which is fine for this statement. OK.\n- ≤ against <, off-by-one: not applicable.\n- Vacuity: the hypothesis is satisfiable. `anchor_hypomorphic_refl` gives Hypomorphic G G for every G.\n- Trivially true: the conclusion is not true for free. `anchor_three_vertices_not_hypomorphic` shows\n  Hypomorphic can fail, so the statement needs real content (σ⁻¹ and the inverse card isos, with\n  transport along σ (σ.symm y) = y). It is easy but not vacuous, which is right for a\n  foundational lemma.\n- Notion of iso, card or deck: `≃g` is graph isomorphism between the induced cards, and it matches\n  the \"same deck\" (multiset of iso classes) characterization. OK.\n- Nonempty against an explicit structure: `Nonempty (… ≃g …)` is the existence of an isomorphism,\n  which is the intended meaning. OK.\n- Coercions: the card vertex types are subtypes `{x}ᶜ : Set (Fin n)`. No numeric coercions are\n  involved. OK.\n\n## Verdict: PASS\n\nThe Lean statement says exactly what the English says.\n",
+      "sha256": "4c56d87126af2d4d5e2d4868f6725bb9f92774d6ae4c656bb6ffe48c634eda77",
+      "at": "2026-11-25T12:27:57+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_symm (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\n- Lean: `∀ (n : ℕ) (G H : SimpleGraph (Fin n)), Recon.Hypomorphic G H → Recon.Hypomorphic H G`\n- English: \"For every n and all graphs G, H on Fin n: if G and H are hypomorphic (have the\n  same deck), then H and G are hypomorphic.\"\n- `Recon.Hypomorphic G H := ∃ σ : V ≃ W, ∀ x, Nonempty (card G x ≃g card H (σ x))`, with\n  `card G x = G.induce {x}ᶜ` (Basic.lean).\n\n## Predicates encoded (script: `notes/sketches/found_hypomorphic_symm/fid_testing_check.py`)\n- `lean_hyp(G, H)`: a direct encoding of the Lean definition. It checks for a bijection\n  V → W that matches every card G − x with an isomorphic card H − σx. I compute it two ways:\n  as a perfect matching in the bipartite \"card-isomorphic\" relation (using `nx.is_isomorphic`\n  on induced subgraphs), and by brute force over all permutations. Neither way uses the\n  canonical forms in `small_graphs.py`, so the check does not depend on that library. The\n  bijection between equal-size vertex sets is a real `Equiv`. When n = 0 the predicate holds\n  vacuously.\n- `en_hyp(G, H)`: the English reading \"same deck\". It holds when the multisets of cards up\n  to isomorphism are equal (`small_graphs.deck_key`) and the orders are equal.\n- I compare the Lean statement `lean_hyp(G,H) → lean_hyp(H,G)` with the English statement\n  `en_hyp(G,H) → en_hyp(H,G)`.\n\n## Results\n- **Unlabeled run:** all ordered pairs of isomorphism classes with n = 0..6 (25,635 pairs,\n  networkx atlas). The two statements never differ, and the Lean statement never fails.\n  `lean_hyp` and `en_hyp` agree on every pair, so the Bondy–Hemminger bijection form and the\n  multiset form of the deck match.\n- **Labeled run:** every labeled graph on Fin n with n = 0..4 (4,166 ordered pairs), using\n  brute-force permutation search. There are 0 differences and 0 failures of symmetry.\n  Labels matter here because `Hypomorphic` is stated on labeled `SimpleGraph (Fin n)`.\n- **Vacuity:** the hypothesis does hold. Across the unlabeled pairs it is true for 211 of\n  them: the 209 diagonal pairs (reflexivity, matching `anchor_hypomorphic_refl`) and both\n  orders of the non-isomorphic pair K2 / 2K1 at n = 2, which matches\n  `anchor_two_vertices_hypomorphic`. In the labeled run it holds for 582 pairs. The library's\n  `hypomorphic` agrees on the n = 2 anchor.\n\n## Checklist of failure modes\n- **Quantifier order and scope:** n, G and H are all universally quantified, and the\n  implication sits inside, as the English says.\n- **Missing or extra hypothesis:** there is no `3 ≤ n`, and that is correct. Symmetry holds\n  for every n, including n = 2, where the hypothesis is genuinely satisfied by non-isomorphic\n  graphs. The English says \"for every n\", which matches.\n- **`Fin n` against arbitrary types:** both readings use Fin n, and G and H share the same\n  n. The general `Hypomorphic` is heterogeneous, but here it is only instantiated on one\n  type. That is a restriction the English states, not a mismatch.\n- **≤ against < or off-by-one:** not applicable.\n- **Vacuity or triviality:** the statement is not vacuous (see above). It is easy, because\n  it needs σ.symm and the inverse card isomorphisms, but it is a real lemma, not\n  definitionally `True`.\n- **Notion of isomorphism, card and deck:** `≃g` on induced subgraphs on `{x}ᶜ` is the\n  vertex-deleted card, and the bijection form equals the multiset deck. I checked that\n  empirically above.\n- **Nonempty against an explicit structure:** `Nonempty (… ≃g …)` is the right\n  propositional form for \"isomorphic\".\n- **Coercions:** none that change meaning. The subtype `{x}ᶜ` card is standard.\n\n## Conclusion\nThe Lean statement means what the English says. I found no distinguishing graph.\n",
+      "sha256": "4c56d87126af2d4d5e2d4868f6725bb9f92774d6ae4c656bb6ffe48c634eda77",
+      "at": "2026-11-25T12:34:21+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "found_hypomorphic_symm_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_found_hypomorphic_symm.lean",
+    "sha256": "c006fde945adba3ac1bfa6e42d962dcf0aaa7f1e872181ab20353c591e14d25c",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T12:42:58+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "4c56d87126af2d4d5e2d4868f6725bb9f92774d6ae4c656bb6ffe48c634eda77",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T12:42:04+00:00"
+}

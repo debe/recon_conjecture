@@ -1,0 +1,55 @@
+{
+  "id": "kelly_card_edges_add_degree",
+  "program": "kelly",
+  "title": "A card has |E| minus deg v edges",
+  "statement_en": "For every n, every graph G on Fin n and every vertex v: the number of edges of the card G - v plus the degree of v in G equals the number of edges of G.",
+  "statement_lean": "∀ (n : ℕ) (G : SimpleGraph (Fin n)) (v : Fin n), (Recon.card G v).edgeSet.ncard + (G.neighborSet v).ncard = G.edgeSet.ncard",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_kelly_card_edges_add_degree.lean",
+  "statement_sha256": "b47886b428263107d8ab03b6a764a6de109b23d452ca3be8d460f0c41b58798c",
+  "status": "checked",
+  "author": "librarian",
+  "created": "2026-11-25T12:27:30+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_card_edges_add_degree (lens: back-translation, reviewer fid-backtranslate)\n\n## Lean statement\n∀ (n : ℕ) (G : SimpleGraph (Fin n)) (v : Fin n),\n  (Recon.card G v).edgeSet.ncard + (G.neighborSet v).ncard = G.edgeSet.ncard\n\n## Expansion of Recon definitions\n- `Recon.card G v` is an abbrev for `G.induce ({v}ᶜ : Set (Fin n))`: the simple graph on the\n  subtype of vertices other than v, where two such vertices are adjacent iff they are adjacent in G.\n\n## My own English reading (written before reading statement_en)\nFor every natural number n, every simple graph G on vertex set Fin n and every vertex v of G:\nthe number of edges of the induced subgraph G - v (on all vertices except v), plus the number\nof neighbours of v in G, equals the number of edges of G. All counts are `Set.ncard`, an\nequation in ℕ (no subtraction involved).\n\n## Comparison with statement_en\n\"For every n, every graph G on Fin n and every vertex v: the number of edges of the card G - v\nplus the degree of v in G equals the number of edges of G.\"\n- Quantifiers: ∀ n, ∀ G, ∀ v; same order and scope. Match.\n- Vertex type Fin n: match.\n- \"card G - v\": Recon.card = induced subgraph on {v}ᶜ, the standard vertex-deleted subgraph. Match.\n- \"degree of v\": `(G.neighborSet v).ncard`; the neighbour set of a vertex in a simple graph\n  (loopless) is exactly what degree counts, equal to `G.degree v` on a finite type. Match.\n- \"number of edges\": `edgeSet.ncard`. Edge sets live in `Sym2 (Fin n)` resp.\n  `Sym2 {v}ᶜ`; all sets are finite (Fin n is a Fintype), so `ncard` never collapses to the\n  infinite-set default 0. The card's edges in `Sym2` of the subtype map injectively to edges\n  of G avoiding v, so ncard counts them correctly. Match.\n- Hypotheses: no n ≥ 3 is needed; the identity holds for all n (n = 0 is vacuous since Fin 0\n  is empty; n = 1 gives 0 + 0 = 0). The English also has no such hypothesis. Match.\n- Title \"A card has |E| minus deg v edges\" is the same fact phrased with subtraction; the Lean\n  uses the addition form, which avoids ℕ truncated subtraction. Equivalent since deg v ≤ |E|.\n\n## Non-vacuity / non-triviality\nHypotheses are satisfiable (any n ≥ 1). The conclusion is a genuine counting identity\n(partition of E(G) into edges through v and edges of G - v), not true by definition.\nBrute-force sanity check of the intended combinatorial identity over all labelled graphs on\nn ≤ 5 vertices and all v: 0 mismatches. It is the standard first step toward\n\"degree sequence is recognizable\" (deg v = |E| − |E(G − v)|, CLAUDE.md §3).\n\n## Coercions\nNone that change meaning: all quantities are ℕ, no casts.\n\n## Verdict: PASS\n",
+      "sha256": "b47886b428263107d8ab03b6a764a6de109b23d452ca3be8d460f0c41b58798c",
+      "at": "2026-11-25T12:28:37+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_card_edges_add_degree (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\nLean: `∀ (n : ℕ) (G : SimpleGraph (Fin n)) (v : Fin n), (Recon.card G v).edgeSet.ncard + (G.neighborSet v).ncard = G.edgeSet.ncard`\n\nEnglish: for every n, every graph G on Fin n and every vertex v, |E(G − v)| + deg_G(v) = |E(G)|.\n\n## Lean reading\n- `Recon.card G v = G.induce {v}ᶜ` (Basic.lean): a graph on the subtype `{v}ᶜ` with G's adjacency.\n  Its `edgeSet` is a `Set (Sym2 ↥{v}ᶜ)`: the edges of G with neither endpoint v. `ncard` is the\n  ordinary count, because the type is finite, so the \"infinite set has ncard 0\" convention never applies.\n- `G.neighborSet v` = {w | G.Adj v w}. Its `ncard` is deg_G(v). It agrees with `G.degree v`, and\n  no `DecidableRel` instance is needed.\n- `G.edgeSet.ncard` = |E(G)|.\n- Every quantity is ℕ, and the identity is written additively, so truncated subtraction is not an\n  issue. (The title says \"|E| minus deg v\" but the body is additive. That is equivalent in ℕ and safer.)\n- The statement has no hypotheses, so it cannot be vacuous through an unsatisfiable hypothesis. The\n  only empty slice is n = 0, where there is no v. For every n ≥ 1 there are instances. The English\n  also says \"every n\", so n ≥ 3 is not required here. The identity holds for every n ≥ 1, so leaving\n  that hypothesis out is correct.\n- The statement uses `Fin n` vertex types, as the English says. No isomorphism notion or deck appears.\n\n## Testing\nScript: `notes/sketches/kelly_card_edges_add_degree/fidelity_fid-testing_check.py` (it imports\n`tools/search/small_graphs.py` as a library).\n- `lean_pred(G, v)`: a literal encoding. The card's edges are the unordered pairs {a, b} with a, b ≠ v,\n  a ≠ b and G-adjacent, with no relabelling (the subtype). The neighbour set is {w | adj v w}.\n- `en_pred(G, v)`: `small_graphs.card(G, v).number_of_edges() + G.degree(v) == G.number_of_edges()`.\n\nResults:\n- Over all graphs up to isomorphism for n = 0..6 (atlas: 1, 1, 2, 4, 11, 34, 156 classes), every\n  vertex v was checked. That is 1 + 4 + 12 + 44 + 170 + 936 = 1167 pairs (G, v), and both predicates\n  were true on all of them, with 0 disagreements.\n- Over all labelled graphs on Fin n for n ≤ 5, every v was checked: 5405 pairs (G, v), with 0\n  disagreements and 0 failures. This also covers the labelled quantifier directly, not only\n  representatives up to isomorphism.\n\n## Other checks\n- The statement file elaborates: `lake env lean` on the generated statement module succeeded.\n- It is not trivially true by definition. It needs the real fact that the edges of G split into those\n  incident to v (there are deg v of them, through the bijection w ↦ s(v, w)) and those of G − v\n  (through `Sym2.map Subtype.val`).\n- It is true on every tested case, so the negated twin should not be provable. This is consistent\n  with the standard fact (CLAUDE.md §3: deg v = |E| − |E(G − v)|).\n\nNo mismatch found.\n",
+      "sha256": "b47886b428263107d8ab03b6a764a6de109b23d452ca3be8d460f0c41b58798c",
+      "at": "2026-11-25T12:29:28+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "kelly_card_edges_add_degree_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_kelly_card_edges_add_degree.lean",
+    "sha256": "cc95f10075943e4dbe664ea83a6772af8b896a181ac3248b80bc3dd5a5ef32fa",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T12:43:35+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "b47886b428263107d8ab03b6a764a6de109b23d452ca3be8d460f0c41b58798c",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T12:42:05+00:00"
+}

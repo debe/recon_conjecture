@@ -1,7 +1,7 @@
 export const meta = {
   name: 'librarian',
   description: 'Literature sweep and Mathlib API map for one topic, then propose (never freeze) steps with citations',
-  whenToUse: 'Opening a program or before attacking a new class. args: {topic, program, maxProposals?}',
+  whenToUse: 'Opening a program or before attacking a new class. args: {topic, program, maxProposals?, slug?}',
   phases: [
     { title: 'Sweep', detail: 'literature scout and Mathlib scout in parallel' },
     { title: 'Propose', detail: 'turn the findings into proposed desk steps' },
@@ -12,7 +12,9 @@ const topic = args && args.topic
 const program = args && args.program
 if (!topic || !program) throw new Error('librarian: args.topic and args.program are required')
 const maxProposals = args.maxProposals || 3
-const slug = topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+// note file name: args.slug, else the program plus the topic's first words (topics are sentences)
+const slug = (args.slug || `${program} ${topic}`).toLowerCase().replace(/[^a-z0-9]+/g, '_')
+  .replace(/^_|_$/g, '').slice(0, 48).replace(/_[^_]*$/, '')
 
 phase('Sweep')
 const [lit, lib] = await parallel([

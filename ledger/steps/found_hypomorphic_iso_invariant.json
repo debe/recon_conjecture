@@ -1,0 +1,54 @@
+{
+  "id": "found_hypomorphic_iso_invariant",
+  "program": "found",
+  "title": "Hypomorphism is invariant under isomorphism on either side",
+  "statement_en": "For every n and all graphs G, G', H, H' on Fin n: if G is isomorphic to G', H is isomorphic to H', and G and H are hypomorphic, then G' and H' are hypomorphic.",
+  "statement_lean": "∀ (n : ℕ) (G G' H H' : SimpleGraph (Fin n)), Nonempty (G ≃g G') → Nonempty (H ≃g H') → Recon.Hypomorphic G H → Recon.Hypomorphic G' H'",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_found_hypomorphic_iso_invariant.lean",
+  "statement_sha256": "f89442c4e61d98475168ccbb90a0eb502a24769cff8ae276d682bba5c2a8db2b",
+  "status": "checked",
+  "author": "librarian",
+  "created": "2026-11-25T12:27:16+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_iso_invariant (lens: back-translation)\n\nReviewer: fid-backtranslate. Verdict: **pass**.\n\n## My reading of the Lean, written before I read statement_en\n\nExpanding `Recon.Hypomorphic` and `Recon.card` from `lean/Recon/Basic.lean`:\n\nFor every natural number n and all simple graphs G, G', H, H' on the vertex type `Fin n`\n(all four on the same `Fin n`), suppose that:\n1. there exists a graph isomorphism G ≅ G' (a bijection of `Fin n` that preserves and\n   reflects adjacency);\n2. there exists a graph isomorphism H ≅ H';\n3. there exists a bijection σ : Fin n ≃ Fin n such that for every vertex x, the induced\n   subgraph of G on {x}ᶜ is isomorphic to the induced subgraph of H on {σ x}ᶜ.\n\nThen there exists a bijection τ : Fin n ≃ Fin n such that for every vertex y, the induced\nsubgraph of G' on {y}ᶜ is isomorphic to the induced subgraph of H' on {τ y}ᶜ.\n\nIn short: if G ≅ G', H ≅ H' and G, H have the same deck, then G', H' have the same deck.\n\n## Clause-by-clause comparison with statement_en\n\n| statement_en | Lean | Match |\n|---|---|---|\n| \"For every n\" | `∀ (n : ℕ)` | yes. There is no n ≥ 3 hypothesis, and none is needed: the claim holds for every n, including 0, 1 and 2. |\n| \"all graphs G, G', H, H' on Fin n\" | `(G G' H H' : SimpleGraph (Fin n))` | yes. All four share the vertex type `Fin n`, as the English says. |\n| \"G is isomorphic to G'\" | `Nonempty (G ≃g G')` | yes. `≃g` is Mathlib's `SimpleGraph.Iso`, the right notion. Nonempty is correct for a Prop. |\n| \"H is isomorphic to H'\" | `Nonempty (H ≃g H')` | yes |\n| \"G and H are hypomorphic\" | `Recon.Hypomorphic G H` | yes. This is the trusted Bondy–Hemminger definition. |\n| \"then G' and H' are hypomorphic\" | `Recon.Hypomorphic G' H'` | yes |\n\n## Failure-mode checklist\n\n- Quantifier order and scope: all universals come first, followed by a chain of\n  implications. There is no hidden existential. Correct.\n- Missing or extra hypothesis: none. n ≥ 3 is correctly absent.\n- Fin n against arbitrary types: the statement uses Fin n, matching the English. It is\n  narrower than a heterogeneous-type version, but it says exactly what the English says.\n- ≤ against <, off-by-one: not applicable.\n- Vacuity: the hypotheses can hold, for example with G = G' = H = H' (the iso is `Iso.refl`\n  and the hypomorphism is `anchor_hypomorphic_refl`). The hypotheses are not contradictory.\n- Trivially true: no. The proof has to restrict the isomorphisms φ : G ≅ G' and\n  ψ : H ≅ H' to the cards, giving G − φ⁻¹y ≅ G' − y, and so on. A witness is\n  τ = ψ ∘ σ ∘ φ⁻¹. The claim is a true, small foundational lemma, which is what a `found`\n  step should be.\n- Notion of isomorphism, card and deck: `≃g` for isomorphism, `card` = the induced subgraph\n  on {x}ᶜ, and the deck only through `Hypomorphic`. All three match the trusted conventions.\n- Coercions: none affect meaning. The `Set (Fin n)` subtype for card vertices comes from\n  Basic.lean.\n\n## Conclusion\n\nThe Lean says exactly what statement_en says. Pass.\n",
+      "sha256": "f89442c4e61d98475168ccbb90a0eb502a24769cff8ae276d682bba5c2a8db2b",
+      "at": "2026-11-25T12:28:02+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: found_hypomorphic_iso_invariant (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement under review\nLean: `∀ (n : ℕ) (G G' H H' : SimpleGraph (Fin n)), Nonempty (G ≃g G') → Nonempty (H ≃g H') →\nRecon.Hypomorphic G H → Recon.Hypomorphic G' H'`\n\nEnglish: for every n and all graphs G, G', H, H' on Fin n, if G ≅ G', H ≅ H' and G, H are\nhypomorphic, then G', H' are hypomorphic.\n\n## Predicates encoded (script: `fid_testing_script.py` in this directory)\n- Lean reading: `lean_hyp(G,H)` = there is a bijection σ with `G - x ≅ H - σx` for all x,\n  with cards as induced subgraphs keeping their original labels (as `G.induce {x}ᶜ`).\n  The ∃σ is decided exactly, as a perfect matching in the bipartite \"cards isomorphic\" graph.\n  Isomorphism (`Nonempty (G ≃g G')`) is `nx.is_isomorphic`.\n- English reading: `en_hyp` = equal decks, that is equal multisets of card isomorphism classes\n  (`small_graphs.hypomorphic`, which uses canonical forms).\n- Each statement instance is `iso ∧ iso ∧ hyp(G,H) → hyp(G',H')` under the matching notion.\n\n## Search\n- n = 0..3: every labelled quadruple (G, G', H, H') on Fin n (4096 at n = 3).\n- n = 0..6: every pair of atlas graphs (G, H), comparing `lean_hyp` with `en_hyp` directly.\n  For each hypomorphic pair, 4 random relabellings (G', H') were tried, plus cases where the\n  isomorphism hypothesis fails.\n- Result: **0 disagreements** between the predicates, and no instance where either\n  statement is false.\n\n## Vacuity / triviality\n- The hypothesis holds often. The labelled count at n = 3 is 164 = 1⁴ + 3⁴ + 3⁴ + 1⁴, as\n  expected. It also holds non-trivially, with G ≇ H: at n = 2, G = K₂ and H = 2K₁ (2 such\n  labelled quadruples). So the statement is not vacuous, and it covers the genuine\n  hypomorphic-but-not-isomorphic case.\n- The conclusion is not trivially true: there are many non-hypomorphic pairs at every n ≥ 3.\n- n = 0, 1, 2 are included, which matches \"for every n\". No `3 ≤ n` is needed or claimed.\n\n## Failure-mode checklist\n- Quantifier order and scope: all universal, and the implications are in the right order. OK.\n- Hypotheses: none missing or extra. The absence of n ≥ 3 is correct for this lemma.\n- `Fin n`: all four graphs share `Fin n`, as the English says. This is narrower than\n  arbitrary types, but that is faithful.\n- Isomorphism notion: `Nonempty (G ≃g G')`, the Mathlib graph isomorphism, is correct.\n  Hypomorphism is the Basic.lean bijection-of-cards definition, which on finite graphs is\n  equivalent to equality of decks (confirmed empirically for n ≤ 6).\n- No coercions are involved.\n",
+      "sha256": "f89442c4e61d98475168ccbb90a0eb502a24769cff8ae276d682bba5c2a8db2b",
+      "at": "2026-11-25T12:31:46+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "found_hypomorphic_iso_invariant_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_found_hypomorphic_iso_invariant.lean",
+    "sha256": "9da04e12c7f51654be3f17c82c657a6132529a842d1a7ad90fed2e2bca5159a8",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T12:43:22+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "f89442c4e61d98475168ccbb90a0eb502a24769cff8ae276d682bba5c2a8db2b",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T12:42:04+00:00"
+}

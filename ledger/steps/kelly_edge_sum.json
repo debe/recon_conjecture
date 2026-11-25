@@ -1,0 +1,55 @@
+{
+  "id": "kelly_edge_sum",
+  "program": "kelly",
+  "title": "The card edge counts sum to (n - 2)|E|",
+  "statement_en": "For every n and every graph G on Fin n: the sum over all vertices v of the number of edges of the card G - v equals (n - 2) times the number of edges of G (natural-number subtraction; both sides are 0 when n < 2).",
+  "statement_lean": "∀ (n : ℕ) (G : SimpleGraph (Fin n)), ∑ v : Fin n, (Recon.card G v).edgeSet.ncard = (n - 2) * G.edgeSet.ncard",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_kelly_edge_sum.lean",
+  "statement_sha256": "9521a68b4ef944f6340dc12df2a03897637a1bc53d8a4eeba1142e4b70e7887a",
+  "status": "checked",
+  "author": "librarian",
+  "created": "2026-11-25T12:27:44+00:00",
+  "parent": null,
+  "is_root": true,
+  "human_approved": true,
+  "fidelity": [
+    {
+      "reviewer": "fid-backtranslate",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_edge_sum (lens: back-translation, reviewer fid-backtranslate)\n\n## Lean statement\n`∀ (n : ℕ) (G : SimpleGraph (Fin n)), ∑ v : Fin n, (Recon.card G v).edgeSet.ncard = (n - 2) * G.edgeSet.ncard`\n\n## Independent back-translation (written before reading statement_en)\n`Recon.card G v` is the abbrev `G.induce ({v}ᶜ : Set (Fin n))`, the subgraph of G induced on\nevery vertex except v, with vertex type the subtype `{v}ᶜ`. Reading: \"For every natural\nnumber n and every simple graph G on vertex set Fin n, the sum over all vertices v of the\nnumber of edges of the induced subgraph G − v equals (n − 2) times the number of edges of G,\nwhere n − 2 is truncated natural subtraction.\"\n\n## Clause-by-clause comparison with statement_en\n- \"For every n and every graph G on Fin n\": matches `∀ n, ∀ G : SimpleGraph (Fin n)`. No\n  hypothesis on n, and none is needed (see below). Fin n, as in the English.\n- \"sum over all vertices v\": `∑ v : Fin n` over the full Fintype. Matches.\n- \"number of edges of the card G − v\": `(Recon.card G v).edgeSet.ncard`. The card is the\n  induced subgraph on `{v}ᶜ`, which is the repository's definition of a card. `Set.ncard`\n  returns 0 on infinite sets, but every edge set here is finite (finite vertex type), so\n  ncard is the true edge count. The count is taken in the subtype graph, not after mapping\n  back into Fin n. The edge count is the same either way.\n- \"equals (n − 2) times the number of edges of G\": `(n - 2) * G.edgeSet.ncard` in ℕ. Matches.\n- \"natural-number subtraction; both sides are 0 when n < 2\": correct. For n ∈ {0, 1}, G has\n  no edges and every card has no edges, so both sides are 0. The English states the\n  truncation explicitly, so the coercion convention is not hidden.\n\n## Failure-mode checklist\n- Quantifier order and scope: fine.\n- Missing or extra hypothesis: none. The identity holds for all n, including n < 3, because\n  each edge {a, b} survives in exactly the n − 2 cards G − v with v ∉ {a, b}, and in ℕ,\n  n·m − 2·m = (n − 2)·m.\n- ≤ against <, off-by-one: the factor is n − 2, which is the right one.\n- Vacuous or trivial: no. It is the genuine double-counting identity behind the recognizability\n  of edge count (Kelly's lemma for H = K₂). The edge-count recognizability step builds on it.\n- Notion of card: Recon.card. Notion of count: edgeSet.ncard, the right one for simple graphs.\n- Coercions: only ℕ arithmetic. No ℤ or ℚ division is hidden.\n\n## Sanity search\nA brute-force enumeration of all labelled graphs on n = 0..6 vertices (Python, Lean reading\nwith truncated subtraction) found 0 mismatches between the LHS and the RHS. The statement is\nnot evidently false.\n\n## Verdict\nPASS. The Lean statement says exactly what the English says.\n",
+      "sha256": "9521a68b4ef944f6340dc12df2a03897637a1bc53d8a4eeba1142e4b70e7887a",
+      "at": "2026-11-25T12:28:41+00:00"
+    },
+    {
+      "reviewer": "fid-testing",
+      "verdict": "pass",
+      "notes": "# Fidelity review: kelly_edge_sum (lens: testing, reviewer fid-testing)\n\nVerdict: **pass**\n\n## Statement\nLean: `∀ (n : ℕ) (G : SimpleGraph (Fin n)), ∑ v : Fin n, (Recon.card G v).edgeSet.ncard = (n - 2) * G.edgeSet.ncard`\n\nEnglish: for every n and every graph G on Fin n, the sum over all vertices v of the number of\nedges of the card G - v equals (n - 2) times the number of edges of G (natural subtraction;\nboth sides are 0 when n < 2).\n\n## Lean reading (checked by elaboration)\n`#print` of the statement shows that every quantity is in ℕ, and no coercion is involved. The sum\nruns over `Finset.univ : Finset (Fin n)`. `Recon.card G v = G.induce {v}ᶜ`, so its `edgeSet` is\nthe set of unordered pairs of distinct vertices other than v that are adjacent in G. The vertex\ntype is finite, so `Set.ncard` gives the true count and the \"infinite set gives 0\" convention\nnever applies. `n - 2` is truncated subtraction.\n\n## Test\nThe script is `notes/sketches/kelly_edge_sum/fidelity_fid-testing_check.py`. It uses\n`tools/search/small_graphs.py` as a library.\n- `lean_reading(n, G)`: the LHS is computed from the raw adjacency relation as the number of\n  adjacent pairs {a,b} with a,b ≠ v, summed over v. The RHS is `max(n-2,0) * |E|`.\n- `english_reading(n, G)`: the LHS is `sum(card(G,v).number_of_edges())` using `small_graphs.card`.\n  The RHS uses integer `(n-2)*|E|`, and a second variant uses natural subtraction.\n\nI ran both over every isomorphism class for n = 0..7 (1253 graphs) and over every labelled graph\nfor n = 0..6 (33,868 graphs, with all 2^15 graphs at n = 6).\n\nResult: the readings never differ, and the Lean predicate holds on every graph. The edge cases\nbehave as stated:\n- n = 0: empty sum = 0 = 0·0;\n- n = 1: 0 = 0;\n- n = 2: every card has 1 vertex and so 0 edges, and the RHS is 0·|E| = 0. Because |E| = 0 for\n  n < 2, natural and integer subtraction agree everywhere.\n\n## Failure-mode checklist\n- Quantifiers: there is a plain universal over n and G and no hidden order issue.\n- Hypotheses: there are none, so there is no vacuity. The English explicitly claims every n,\n  including n < 3, and the identity is true there. A missing `3 ≤ n` is therefore not a\n  defect: the identity does not need it.\n- `Fin n` matches the English \"graph G on Fin n\".\n- Off-by-one: the factor is n − 2, which is correct because each edge survives in exactly the\n  n − 2 cards that delete neither endpoint.\n- Not trivially true: it is the content of the double-counting argument for n ≥ 3.\n- Card notion: this is the trusted `Recon.card` (induced subgraph on {v}ᶜ), which matches the\n  vertex-deleted subgraph. The deck and isomorphism are not involved.\n- Coercions: none. Everything is in ℕ.\n\nEvidence only. This is a sketch-level search, not a result.\n",
+      "sha256": "9521a68b4ef944f6340dc12df2a03897637a1bc53d8a4eeba1142e4b70e7887a",
+      "at": "2026-11-25T12:29:36+00:00"
+    }
+  ],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "kelly_edge_sum_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_kelly_edge_sum.lean",
+    "sha256": "29dcccdbd028c4f2c2841f8923539390944209c41dcc0c2e2eb6c1a8804fe65a",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T12:44:19+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "human_approved_sha256": "9521a68b4ef944f6340dc12df2a03897637a1bc53d8a4eeba1142e4b70e7887a",
+  "approved_by": "debe",
+  "frozen_at": "2026-11-25T12:42:05+00:00"
+}
