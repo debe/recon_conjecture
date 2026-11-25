@@ -1,0 +1,38 @@
+{
+  "id": "conj_kelly_ulam__disconnected__kelly_induced_count",
+  "program": "conj",
+  "title": "Kelly's lemma (induced form)",
+  "statement_en": "Kelly's lemma, induced form: if G and H on n vertices are hypomorphic, then for every k < n and every graph F on k vertices, G and H have the same number of k-vertex subsets inducing a copy of F.",
+  "statement_lean": "∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), Recon.Hypomorphic G H → ∀ k : ℕ, k < n → ∀ F : SimpleGraph (Fin k), {S : Finset (Fin n) | Nonempty (G.induce (S : Set (Fin n)) ≃g F)}.ncard = {S : Finset (Fin n) | Nonempty (H.induce (S : Set (Fin n)) ≃g F)}.ncard",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__disconnected__kelly_induced_count.lean",
+  "statement_sha256": "4a94008df6c027eb0910248777790ab53b53b9169248f476bc5cebe66dba887e",
+  "status": "checked",
+  "author": "reducer",
+  "created": "2026-11-25T15:41:55+00:00",
+  "parent": "conj_kelly_ulam__disconnected",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__disconnected__kelly_induced_count_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__disconnected__kelly_induced_count.lean",
+    "sha256": "3776651a4c8d4db5051cfc83fe1a1a286ea1779bcbe8ee735f714cf66786580e",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T15:45:36+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-25T15:41:55+00:00"
+}

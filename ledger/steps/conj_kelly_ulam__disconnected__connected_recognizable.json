@@ -1,0 +1,38 @@
+{
+  "id": "conj_kelly_ulam__disconnected__connected_recognizable",
+  "program": "conj",
+  "title": "Connectedness is recognizable",
+  "statement_en": "Connectedness is recognizable from the deck for graphs on at least 3 vertices (Kelly 1957: for n >= 3, G is connected iff at least two cards are connected).",
+  "statement_lean": "Recon.Recognizable (fun n G => G.Connected)",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__disconnected__connected_recognizable.lean",
+  "statement_sha256": "ad0d4ddcb10ab624b69277ce67cb167d950c91939d8fe15bcc8b95a0a85cc671",
+  "status": "checked",
+  "author": "reducer",
+  "created": "2026-11-25T15:41:55+00:00",
+  "parent": "conj_kelly_ulam__disconnected",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__disconnected__connected_recognizable_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__disconnected__connected_recognizable.lean",
+    "sha256": "4da5b75dae21b2a86afa666b724666f4d60d25020734157b2677e2228824fa91",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T15:44:27+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-25T15:41:55+00:00"
+}

@@ -7,15 +7,40 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__disconnected.lean",
   "statement_sha256": "49832800d5b3be26a09b7f591d2c2f0c036e0a0b731aeb15228673266687d175",
-  "status": "frozen",
+  "status": "reduced",
   "author": "reducer",
   "created": "2026-11-25T13:58:46+00:00",
   "parent": "conj_kelly_ulam",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__disconnected__component_counts_of_induced_counts",
+    "conj_kelly_ulam__disconnected__connected_recognizable",
+    "conj_kelly_ulam__disconnected__iso_of_component_counts",
+    "conj_kelly_ulam__disconnected__kelly_induced_count"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__disconnected_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__disconnected_r1.lean",
+      "children": [
+        "conj_kelly_ulam__disconnected__connected_recognizable",
+        "conj_kelly_ulam__disconnected__kelly_induced_count",
+        "conj_kelly_ulam__disconnected__component_counts_of_induced_counts",
+        "conj_kelly_ulam__disconnected__iso_of_component_counts"
+      ],
+      "status": "checked",
+      "sha256": "1756bc0a1e141dc4cbc5ee287369d2eb4a516a7bda9018868cf0139faaf70f7d",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-25T15:41:55+00:00",
+      "by": "reducer"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__disconnected_neg",
   "dead_ends": [],
   "sketches": [],

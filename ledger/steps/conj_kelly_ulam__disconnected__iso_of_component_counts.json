@@ -1,0 +1,38 @@
+{
+  "id": "conj_kelly_ulam__disconnected__iso_of_component_counts",
+  "program": "conj",
+  "title": "Equal component counts imply isomorphism",
+  "statement_en": "Two graphs on n vertices with the same number of connected components isomorphic to each connected graph F are isomorphic.",
+  "statement_lean": "∀ n : ℕ, ∀ G H : SimpleGraph (Fin n), (∀ k : ℕ, ∀ F : SimpleGraph (Fin k), F.Connected → {c : G.ConnectedComponent | Nonempty (G.induce c.supp ≃g F)}.ncard = {c : H.ConnectedComponent | Nonempty (H.induce c.supp ≃g F)}.ncard) → Nonempty (G ≃g H)",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__disconnected__iso_of_component_counts.lean",
+  "statement_sha256": "b22e7a286babd660fd5235f950f07766ec29cf9d1931da297723b58f6d474470",
+  "status": "checked",
+  "author": "reducer",
+  "created": "2026-11-25T15:41:55+00:00",
+  "parent": "conj_kelly_ulam__disconnected",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__disconnected__iso_of_component_counts_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__disconnected__iso_of_component_counts.lean",
+    "sha256": "a70abb0a18a416004e04d4d0ef140507a50b12ba96bb54f1b94349e43ce2bf27",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-25T15:45:55+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-25T15:41:55+00:00"
+}
