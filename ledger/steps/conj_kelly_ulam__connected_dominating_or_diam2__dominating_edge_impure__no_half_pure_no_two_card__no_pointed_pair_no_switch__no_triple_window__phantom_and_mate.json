@@ -7,15 +7,38 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate.lean",
   "statement_sha256": "915c81f10125347d9a70ca0ec51c0ad5474beadf26865c19399d81ff730a412e",
-  "status": "frozen",
+  "status": "reduced",
   "author": "round13",
   "created": "2026-11-26T21:14:55+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degenerate",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_rigid_apex"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate_r1.lean",
+      "children": [
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_rigid_apex",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degenerate"
+      ],
+      "status": "checked",
+      "sha256": "475018f00237f3e8a609b30f1bb6569960c95f7a799bf34b1ffb774adb19d191",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-26T22:35:00+00:00",
+      "by": "agent"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate_neg",
   "dead_ends": [],
   "sketches": [],
