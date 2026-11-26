@@ -13,6 +13,16 @@ const step = args && args.step
 if (!step) throw new Error('reduce: args.step is required')
 const hints = args.hints || []
 
+// Lease heartbeat: long phases outlive a 120-minute lease. When the caller holds the lease
+// (campaign passes args.holder), every long-running worker renews it while it works.
+const holder = args && args.holder
+const HB = holder
+  ? ` Lease heartbeat: holder ${holder} leases step ${step}. Run \`python3 tools/desk.py beat ${step} --holder ${holder} --minutes 120 --note "<what you are doing>"\` ` +
+    `when you start, and again whenever about 30 minutes have passed since your last beat (check \`date\`; beat between ` +
+    `compile iterations, test runs or sketch sections). If a beat fails because another holder has the lease, stop at once ` +
+    `and report that the lease was lost, with what you finished.`
+  : ''
+
 const PROPOSAL = {
   type: 'object',
   properties: {
@@ -39,7 +49,7 @@ const prop = await agent(
   `4) Write notes/sketches/${step}/reduction.json: {"parent": "${step}", "by": "reducer", "proof_file": "lean/Recon/Scratch/${step}/reduction.lean", ` +
   `"children": [{"slug": ..., "title": ..., "statement_en": ..., "statement_lean": <Lean Prop using Recon.* defs>}, ...]}. ` +
   `5) Iterate with \`python3 tools/gate.py check-reduction notes/sketches/${step}/reduction.json --dry\` until PRECHECK PASSED. ` +
-  `Do NOT run it without --dry. A child must not restate the parent; a useless split (P → P) earns nothing.`,
+  `Do NOT run it without --dry. A child must not restate the parent; a useless split (P → P) earns nothing.` + HB,
   { label: `reducer:${step}`, phase: 'Propose', agentType: 'builder', schema: PROPOSAL })
 if (!prop || !prop.ok) return { step, reduced: false, prop }
 
@@ -55,7 +65,7 @@ const SCREEN = {
 const screen = await agent(
   `Screen these proposed child statements of step ${step} for falsity before they enter the ledger: ` +
   `${JSON.stringify(prop.children)}. For each child, encode it in notes/sketches/${step}/screen_<child>.py and run ` +
-  `\`python3 tools/search/small_graphs.py counterexample --claim <file> --n-max 7\`. Report any witness.`,
+  `\`python3 tools/search/small_graphs.py counterexample --claim <file> --n-max 7\`. Report any witness.` + HB,
   { label: `screen:${step}`, phase: 'Screen', agentType: 'red-team', schema: SCREEN })
 if (screen && screen.any_false) {
   log(`${step}: a child looks false on small graphs; reduction not submitted`)

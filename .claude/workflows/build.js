@@ -14,6 +14,16 @@ const target = args.target || step              // `${step}_neg` to refute the s
 const sketches = args.sketches || []
 const escalate = args.escalate !== false
 
+// Lease heartbeat: long phases outlive a 120-minute lease. When the caller holds the lease
+// (campaign passes args.holder), every long-running worker renews it while it works.
+const holder = args && args.holder
+const HB = holder
+  ? ` Lease heartbeat: holder ${holder} leases step ${step}. Run \`python3 tools/desk.py beat ${step} --holder ${holder} --minutes 120 --note "<what you are doing>"\` ` +
+    `when you start, and again whenever about 30 minutes have passed since your last beat (check \`date\`; beat between ` +
+    `compile iterations, test runs or sketch sections). If a beat fails because another holder has the lease, stop at once ` +
+    `and report that the lease was lost, with what you finished.`
+  : ''
+
 const RESULT = {
   type: 'object',
   properties: {
@@ -37,7 +47,7 @@ const brief = (label, extra) =>
   `\`python3 tools/gate.py precheck ${target} lean/Recon/Scratch/${step}/${label}.lean\`; when it passes, ` +
   `submit once with \`python3 tools/gate.py check ${target} lean/Recon/Scratch/${step}/${label}.lean --actor ${label}\`. ` +
   `Verdict ACCEPTED only if the gate printed ACCEPTED. ${extra || ''} ` +
-  `Stop after about 25 compile iterations without progress and report GAVE_UP with an honest release_reason.`
+  `Stop after about 25 compile iterations without progress and report GAVE_UP with an honest release_reason.` + HB
 
 phase('Build')
 const first = await agent(brief('b1'), { label: `builder:${target}:b1`, phase: 'Build', agentType: 'builder', schema: RESULT })

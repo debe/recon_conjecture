@@ -32,13 +32,14 @@ const sel = await agent(
   (forced.length ? `Work exactly on these steps: ${forced.join(', ')}. ` : `Pick at most ${maxSteps} frozen, unleased step(s). `) +
   `For each choose a plan (think if no surviving sketch; build if a sketch survived (list its paths); redteam if you ` +
   `suspect it is false; reduce after repeated missing_lemma releases). Lease each: ` +
-  `\`python3 tools/desk.py lease <id> --holder campaign\`. round = 1 + the highest notes/rounds/<n>.md number.`,
+  `\`python3 tools/desk.py lease <id> --holder campaign --minutes 120 --note "<plan>"\` (the workers renew it with desk.py beat while they run). round = 1 + the highest notes/rounds/<n>.md number.`,
   { label: 'strategist:select', phase: 'Select', agentType: 'strategist', schema: PICKS })
 if (!sel || !sel.picks.length) return { round: sel && sel.round, picks: [], note: 'nothing to do: freeze steps first (librarian -> fidelity -> human approve)' }
 const picks = sel.picks.slice(0, Math.max(maxSteps, forced.length))
 log(`round ${sel.round}: ${picks.map(p => `${p.step}:${p.plan}`).join(', ')}`)
 
-const run = (name, a) => workflow(name, a).catch(e => ({ error: String(e) }))
+// Every sub-workflow gets the lease holder so its workers renew the lease (desk.py beat).
+const run = (name, a) => workflow(name, { ...a, holder: 'campaign' }).catch(e => ({ error: String(e) }))
 
 const outcomes = await pipeline(
   picks,

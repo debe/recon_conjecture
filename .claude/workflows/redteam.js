@@ -11,6 +11,16 @@ export const meta = {
 const step = args && args.step
 if (!step) throw new Error('redteam: args.step is required')
 
+// Lease heartbeat: long phases outlive a 120-minute lease. When the caller holds the lease
+// (campaign passes args.holder), every long-running worker renews it while it works.
+const holder = args && args.holder
+const HB = holder
+  ? ` Lease heartbeat: holder ${holder} leases step ${step}. Run \`python3 tools/desk.py beat ${step} --holder ${holder} --minutes 120 --note "<what you are doing>"\` ` +
+    `when you start, and again whenever about 30 minutes have passed since your last beat (check \`date\`; beat between ` +
+    `compile iterations, test runs or sketch sections). If a beat fails because another holder has the lease, stop at once ` +
+    `and report that the lease was lost, with what you finished.`
+  : ''
+
 const HUNT = {
   type: 'object',
   properties: {
@@ -28,7 +38,7 @@ const hunt = await agent(
   `Hunt for a counterexample to step ${step}. Read \`python3 tools/desk.py status ${step}\`. Encode the Lean ` +
   `statement as claim(G) and/or claim_pair(G, H) in notes/sketches/${step}/redteam_hunt.py. Run ` +
   `\`python3 tools/search/small_graphs.py counterexample --claim notes/sketches/${step}/redteam_hunt.py --n-max 7 --random 2000 --random-n 8 9\`. ` +
-  `Fix and re-run if the encoding is wrong. Report what the tool printed.`,
+  `Fix and re-run if the encoding is wrong. Report what the tool printed.` + HB,
   { label: `redteam:${step}:hunt`, phase: 'Hunt', agentType: 'red-team', schema: HUNT })
 
 if (!hunt || !hunt.witness_found) return { step, refuted: false, hunt }
@@ -55,6 +65,6 @@ const build = await agent(
   `actually violate the Lean statement (encoding gap), stop and report GAVE_UP explaining the gap. ` +
   `Iterate with \`cd lean && lake env lean Recon/Scratch/${step}/${label}.lean\` and ` +
   `\`python3 tools/gate.py precheck ${target} lean/Recon/Scratch/${step}/${label}.lean\`, then submit once with ` +
-  `\`python3 tools/gate.py check ${target} lean/Recon/Scratch/${step}/${label}.lean --actor redteam-${label}\`.`,
+  `\`python3 tools/gate.py check ${target} lean/Recon/Scratch/${step}/${label}.lean --actor redteam-${label}\`.` + HB,
   { label: `builder:${target}`, phase: 'Refute', agentType: 'builder', schema: RESULT })
 return { step, refuted: !!(build && build.verdict === 'ACCEPTED'), hunt, build }
