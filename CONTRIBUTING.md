@@ -27,7 +27,8 @@ be trusted. Read `CLAUDE.md` first; it is the operating manual your agents follo
    python3 tools/live.py ping
    ```
    The maintainer adds the token's SHA-256 to the relay (`relay/README.md`).
-5. **Borg (optional).** Install borg, then join the `recon` team collective with the
+5. **Borg (recommended).** Fleets on different machines message each other through borg
+   (CLAUDE.md §12). Install borg, then join the `recon` team collective with the
    ticket a maintainer sends you:
    ```sh
    borg mesh join <ticket> --paths ~/path/to/recon_conjecture --apply
