@@ -1,0 +1,45 @@
+{
+  "id": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__slice_determined",
+  "program": "conj",
+  "title": "Slice-determined graphs (Theorem PC+) are reconstructible",
+  "statement_en": "Theorem PC+ (slice-determined, t2.md section 3 of the diameter-2 no_triple_window directory): every graph G on at least 3 vertices with u ≠ v such that every graph K on the same vertex set that (1) has, through one bijection τ, the degree and the two-walk sum (sum of neighbour degrees) of G at every vertex, (2) for every pointed card (G − r, s) with G − r − s ≅ G − u − v has as many ordered pairs (p, q) with (K − p, q) ≅ (G − r, s) as G, and (3) has as many ordered pairs (p, q) with K − p − q ≅ G − u − v as G, is isomorphic to G; is reconstructible.",
+  "statement_lean": "Recon.ClassReconstructible (fun n G => ∃ u v : Fin n, u ≠ v ∧ ∀ K : SimpleGraph (Fin n), (∃ τ : Fin n ≃ Fin n, ∀ x : Fin n, (G.neighborSet x).ncard = (K.neighborSet (τ x)).ncard ∧ ∑ y : Fin n, Set.indicator (G.neighborSet x) (fun y => ((G.neighborSet y).ncard : ℤ)) y = ∑ y : Fin n, Set.indicator (K.neighborSet (τ x)) (fun y => ((K.neighborSet y).ncard : ℤ)) y) → (∀ r s : Fin n, r ≠ s → Nonempty (G.induce ({r, s}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n))) → {p : Fin n × Fin n | p.1 ≠ p.2 ∧ ∃ e : K.induce ({p.1}ᶜ : Set (Fin n)) ≃g G.induce ({r}ᶜ : Set (Fin n)), ∀ z : ({p.1}ᶜ : Set (Fin n)), z.1 = p.2 → (e z).1 = s}.ncard = {p : Fin n × Fin n | p.1 ≠ p.2 ∧ ∃ e : G.induce ({p.1}ᶜ : Set (Fin n)) ≃g G.induce ({r}ᶜ : Set (Fin n)), ∀ z : ({p.1}ᶜ : Set (Fin n)), z.1 = p.2 → (e z).1 = s}.ncard) → {p : Fin n × Fin n | p.1 ≠ p.2 ∧ Nonempty (K.induce ({p.1, p.2}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)))}.ncard = {p : Fin n × Fin n | p.1 ≠ p.2 ∧ Nonempty (G.induce ({p.1, p.2}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)))}.ncard → Nonempty (G ≃g K))",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__slice_determined.lean",
+  "statement_sha256": "13d82c5f6a3035e488233525e10e81868b5dfb4301680c86bbfa1ae9851373cf",
+  "status": "checked",
+  "author": "round13",
+  "created": "2026-11-26T21:14:55+00:00",
+  "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__slice_determined_neg",
+  "dead_ends": [
+    {
+      "approach": "checked",
+      "reason": "other",
+      "by": "debe/round13-build",
+      "at": "2026-11-26T21:16:57+00:00"
+    }
+  ],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__slice_determined.lean",
+    "sha256": "14b9519581e4e8a6c62189e639e51634a52af344c7988e513a1c6e100a437756",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-26T21:16:54+00:00",
+    "by": "round13-build",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-26T21:14:55+00:00"
+}
