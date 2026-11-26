@@ -7,15 +7,36 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch.lean",
   "statement_sha256": "739560b5d297a2de83b39b2c81fc0702728358786ef69b9264352da07baa546f",
-  "status": "frozen",
+  "status": "reduced",
   "author": "round11",
   "created": "2026-11-26T17:05:15+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window",
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__pointed_triple_window"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch_r1.lean",
+      "children": [
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__pointed_triple_window",
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window"
+      ],
+      "status": "checked",
+      "sha256": "65cace9486c0f19d25227d419218313f0f35f97ed47175bc2b49a29a2339c08e",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-26T19:17:25+00:00",
+      "by": "agent"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch_neg",
   "dead_ends": [],
   "sketches": [],
