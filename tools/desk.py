@@ -66,7 +66,10 @@ RELEASE_REASONS = (
     "does_not_elaborate", "out_of_time", "reduced", "other",
 )
 FIDELITY_PASSES_NEEDED = 2
-MAX_STATEMENT_CHARS = 4000
+# One cap for every statement, roots and reduction children (the gate reads it too). A
+# residual child carries its parent's predicate plus every exclusion, so it grows with the
+# depth of the tree; this only guards against runaway input, not against hard statements.
+MAX_STATEMENT_CHARS = 32000
 
 # Statement bodies are Lean terms elaborated in a trusted file. They may use Mathlib and the
 # Recon definitions, nothing that runs code or changes syntax.
