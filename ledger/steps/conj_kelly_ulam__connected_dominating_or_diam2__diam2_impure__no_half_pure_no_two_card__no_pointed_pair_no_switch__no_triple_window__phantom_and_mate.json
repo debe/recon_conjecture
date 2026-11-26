@@ -7,18 +7,66 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate.lean",
   "statement_sha256": "a74439c3002ba375b5302f1a123ea58df1fe94d3abdab7737ab01f85ee459516",
-  "status": "frozen",
+  "status": "reduced",
   "author": "round13",
   "created": "2026-11-26T21:14:19+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degenerate",
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one",
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_rigid_apex"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate_r1.lean",
+      "children": [
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one",
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_rigid_apex",
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degenerate"
+      ],
+      "status": "checked",
+      "sha256": "ecc65310cb91270ad074560948faab51255415d6ac649c5edc3ab82a6d3b0048",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-26T22:34:23+00:00",
+      "by": "agent"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate_neg",
   "dead_ends": [],
-  "sketches": [],
+  "sketches": [
+    {
+      "path": "notes/sketches/conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate/t2.md",
+      "by": "debe/round14-t2",
+      "at": "2026-11-26T22:32:48+00:00",
+      "survived_refutation": true
+    },
+    {
+      "path": "notes/sketches/conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate/t1.md",
+      "by": "debe/round14-t1",
+      "at": "2026-11-26T22:32:48+00:00",
+      "survived_refutation": false
+    },
+    {
+      "path": "notes/sketches/conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate/t3.md",
+      "by": "debe/round14-t3",
+      "at": "2026-11-26T22:32:48+00:00",
+      "survived_refutation": false
+    },
+    {
+      "path": "notes/sketches/conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate/t4.md",
+      "by": "debe/round14-t4",
+      "at": "2026-11-26T22:32:49+00:00",
+      "survived_refutation": false
+    }
+  ],
   "checked": null,
   "refuted": null,
   "priority": 50,
