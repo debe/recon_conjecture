@@ -7,15 +7,38 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure.lean",
   "statement_sha256": "df9811b3c9ea31d7e8bc19981043b2bd9b5ef3e635236a88cd13329c72b2448d",
-  "status": "frozen",
+  "status": "reduced",
   "author": "reducer",
   "created": "2026-11-25T18:56:44+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__level_half_pure",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__two_card_narrow"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure_r1.lean",
+      "children": [
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__level_half_pure",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__two_card_narrow",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card"
+      ],
+      "status": "checked",
+      "sha256": "7bc290a68b6516d2b1ce366e49f5ed2df813d7b05bab5938dd5fc952ab86c5fa",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-25T23:56:21+00:00",
+      "by": "agent"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure_neg",
   "dead_ends": [],
   "sketches": [],

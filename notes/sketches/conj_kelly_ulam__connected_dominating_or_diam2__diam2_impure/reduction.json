@@ -1,0 +1,25 @@
+{
+ "parent": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure",
+ "by": "round10",
+ "proof_file": "lean/Recon/Scratch/conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure/reduction.lean",
+ "children": [
+  {
+   "slug": "level_half_pure",
+   "title": "Level-wise half purity (Theorem D) is reconstructible",
+   "statement_en": "Every graph G on at least 3 vertices with a vertex u such that, for every j, either every neighbour y of u of degree j + 1 is forced, or every non-neighbour y ≠ u of degree j is forced, is reconstructible. Here y is forced if every ordered pair (x', y') with x' ≠ y', deg x' = deg u and G − x' − y' ≅ G − u − y has the adjacency of (u, y) (Theorem D of debe_codegree.md; contains the pure degree class).",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => ∃ u : Fin n, ∀ j : ℕ, (∀ y : Fin n, G.Adj u y → (G.neighborSet y).ncard = j + 1 → ∀ x' y' : Fin n, (G.neighborSet x').ncard = (G.neighborSet u).ncard → x' ≠ y' → Nonempty (G.induce ({u, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → G.Adj x' y') ∨ (∀ y : Fin n, y ≠ u → ¬ G.Adj u y → (G.neighborSet y).ncard = j → ∀ x' y' : Fin n, (G.neighborSet x').ncard = (G.neighborSet u).ncard → x' ≠ y' → Nonempty (G.induce ({u, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → ¬ G.Adj x' y'))"
+  },
+  {
+   "slug": "two_card_narrow",
+   "title": "Narrow two-card-types class is reconstructible",
+   "statement_en": "Every graph G on at least 3 vertices whose degrees are all d or d + 1, whose cards at vertices of equal degree are isomorphic, and which has a card isomorphism α : G − u ≅ G − u' and a neighbour x of u with α(x) not adjacent to u' (so α does not extend to an automorphism), is reconstructible (narrow two-card-types class, Zinchenko arXiv:2611.13728 §§2–4; debe_zinchenko.md §6 N).",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => (∃ d : ℕ, ∀ x : Fin n, (G.neighborSet x).ncard = d ∨ (G.neighborSet x).ncard = d + 1) ∧ (∀ x y : Fin n, (G.neighborSet x).ncard = (G.neighborSet y).ncard → Nonempty (G.induce ({x}ᶜ : Set (Fin n)) ≃g G.induce ({y}ᶜ : Set (Fin n)))) ∧ ∃ u u' : Fin n, ∃ α : G.induce ({u}ᶜ : Set (Fin n)) ≃g G.induce ({u'}ᶜ : Set (Fin n)), ∃ x : ({u}ᶜ : Set (Fin n)), G.Adj u x.1 ∧ ¬ G.Adj u' (α x).1)"
+  },
+  {
+   "slug": "no_half_pure_no_two_card",
+   "title": "Residual: diameter-2 residual without level-wise half purity and outside the narrow two-card class",
+   "statement_en": "Every graph in the diameter-2 residual (as in conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure) that has no level-wise half-pure vertex (as in level_half_pure) and is not in the narrow two-card class (as in two_card_narrow) is reconstructible. Open.",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => G.Connected ∧ Gᶜ.Connected ∧ (∀ u v : Fin n, G.edist u v ≤ 2 ∧ Gᶜ.edist u v ≤ 2) ∧ ¬ (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')) ∧ ¬ (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1)) ∧ ¬ (∃ u : Fin n, ∀ j : ℕ, (∀ y : Fin n, G.Adj u y → (G.neighborSet y).ncard = j + 1 → ∀ x' y' : Fin n, (G.neighborSet x').ncard = (G.neighborSet u).ncard → x' ≠ y' → Nonempty (G.induce ({u, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → G.Adj x' y') ∨ (∀ y : Fin n, y ≠ u → ¬ G.Adj u y → (G.neighborSet y).ncard = j → ∀ x' y' : Fin n, (G.neighborSet x').ncard = (G.neighborSet u).ncard → x' ≠ y' → Nonempty (G.induce ({u, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → ¬ G.Adj x' y')) ∧ ¬ ((∃ d : ℕ, ∀ x : Fin n, (G.neighborSet x).ncard = d ∨ (G.neighborSet x).ncard = d + 1) ∧ (∀ x y : Fin n, (G.neighborSet x).ncard = (G.neighborSet y).ncard → Nonempty (G.induce ({x}ᶜ : Set (Fin n)) ≃g G.induce ({y}ᶜ : Set (Fin n)))) ∧ ∃ u u' : Fin n, ∃ α : G.induce ({u}ᶜ : Set (Fin n)) ≃g G.induce ({u'}ᶜ : Set (Fin n)), ∃ x : ({u}ᶜ : Set (Fin n)), G.Adj u x.1 ∧ ¬ G.Adj u' (α x).1))"
+  }
+ ]
+}
