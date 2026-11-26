@@ -7,7 +7,7 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_eigen.lean",
   "statement_sha256": "561137a0dc3c9c83b3972369e521747526e6002e8a0c0f7e48c2589accb31564",
-  "status": "frozen",
+  "status": "checked",
   "author": "reducer",
   "created": "2026-11-26T15:41:31+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow",
@@ -19,7 +19,19 @@
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_eigen_neg",
   "dead_ends": [],
   "sketches": [],
-  "checked": null,
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_eigen.lean",
+    "sha256": "0972cd3c3964872454777ee7ac26384c2b7f3651e470c3abd6d982f70e41df1d",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-26T21:40:08+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
   "refuted": null,
   "priority": 50,
   "frozen_at": "2026-11-26T15:41:31+00:00"
