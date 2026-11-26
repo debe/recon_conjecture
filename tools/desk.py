@@ -59,7 +59,7 @@ LOCK = LEDGER / ".lock"
 SLUG = r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*"
 ROOT_ID = re.compile(rf"^[a-z]+_{SLUG}$")
 STEP_ID = re.compile(rf"^[a-z]+_{SLUG}(?:__{SLUG})*$")
-MAX_ID_CHARS = 120
+MAX_ID_CHARS = 200
 STATUSES = ("proposed", "frozen", "checked", "refuted", "reduced", "withdrawn")
 RELEASE_REASONS = (
     "hypothesis_too_weak", "missing_lemma", "statement_seems_false",
