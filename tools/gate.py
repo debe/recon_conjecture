@@ -384,8 +384,9 @@ def cmd_check_reduction(bundle_path: str, actor: str, dry: bool = False) -> list
                 raise Rejected("a child restates the parent")
             if re.search(rf"\bS_{re.escape(parent)}\b", c):
                 raise Rejected("a child refers to the parent statement")
-            if len(c) > 8000:
-                raise Rejected("a child statement is longer than 8000 characters")
+            if len(c) > desk.MAX_STATEMENT_CHARS:
+                raise Rejected(f"a child statement is longer than {desk.MAX_STATEMENT_CHARS} "
+                               "characters")
         written: list[Path] = []
         try:
             shas = []
