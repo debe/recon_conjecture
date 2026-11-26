@@ -7,7 +7,7 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_symmetric.lean",
   "statement_sha256": "59775aa6f5edfe9eb6c898dd9fdb8bd68bbd4128cf538d81291b7d00974de73c",
-  "status": "frozen",
+  "status": "checked",
   "author": "round11",
   "created": "2026-11-26T17:05:53+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card",
@@ -19,7 +19,19 @@
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_symmetric_neg",
   "dead_ends": [],
   "sketches": [],
-  "checked": null,
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_symmetric.lean",
+    "sha256": "41506527023b5fa88f1768a05da9a5d7177f39d314a26629769dd94edd70dbb7",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-26T17:28:27+00:00",
+    "by": "round11-b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
   "refuted": null,
   "priority": 50,
   "frozen_at": "2026-11-26T17:05:53+00:00"
