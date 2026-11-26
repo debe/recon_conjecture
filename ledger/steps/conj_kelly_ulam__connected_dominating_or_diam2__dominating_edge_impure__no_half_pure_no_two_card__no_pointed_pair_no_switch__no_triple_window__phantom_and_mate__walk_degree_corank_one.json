@@ -1,0 +1,45 @@
+{
+  "id": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one",
+  "program": "conj",
+  "title": "Walk and degree classes of corank at most one (Theorem DWC1) are reconstructible",
+  "statement_en": "Theorem DWC1 (round-14 t2.md (Theorem H, aligned Hagos) and t3.md (Theorems DWC, WR) in the phantom_and_mate directory of the diameter-2 branch): every graph G on at least 3 vertices such that any two integer vectors f, g orthogonal to every walk vector A^k 1 of G (k ≥ 0) and summing to zero over every degree class of G are linearly dependent over the integers (the walk vectors and degree-class indicators span all but at most one dimension) is reconstructible.",
+  "statement_lean": "Recon.ClassReconstructible (fun n G => ∀ w : ℕ → Fin n → ℤ, (∀ x : Fin n, w 0 x = 1) → (∀ k : ℕ, ∀ x : Fin n, w (k + 1) x = ∑ y : Fin n, Set.indicator (G.neighborSet x) (w k) y) → ∀ f g : Fin n → ℤ, (∀ k : ℕ, ∑ x : Fin n, f x * w k x = 0) → (∀ j : ℕ, ∑ x : Fin n, Set.indicator {x : Fin n | (G.neighborSet x).ncard = j} f x = 0) → (∀ k : ℕ, ∑ x : Fin n, g x * w k x = 0) → (∀ j : ℕ, ∑ x : Fin n, Set.indicator {x : Fin n | (G.neighborSet x).ncard = j} g x = 0) → ∃ a b : ℤ, (a ≠ 0 ∨ b ≠ 0) ∧ ∀ x : Fin n, a * f x + b * g x = 0)",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one.lean",
+  "statement_sha256": "e1cb231d016b55406be9ea3e589381285783e67bf2a8aade6b06f00c398e039f",
+  "status": "checked",
+  "author": "round14",
+  "created": "2026-11-26T22:35:00+00:00",
+  "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one_neg",
+  "dead_ends": [
+    {
+      "approach": "checked",
+      "reason": "other",
+      "by": "debe/round14-build",
+      "at": "2026-11-26T22:47:35+00:00"
+    }
+  ],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__phantom_and_mate__walk_degree_corank_one.lean",
+    "sha256": "5e2c301d8ecbda6b33bb34f1af59238addb9eeb2282420585c087bb09573ab2f",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-26T22:47:33+00:00",
+    "by": "round14-build",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-26T22:35:00+00:00"
+}
