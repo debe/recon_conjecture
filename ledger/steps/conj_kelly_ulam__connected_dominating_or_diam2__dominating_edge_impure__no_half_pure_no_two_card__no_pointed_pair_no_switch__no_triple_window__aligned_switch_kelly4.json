@@ -1,0 +1,45 @@
+{
+  "id": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__aligned_switch_kelly4",
+  "program": "conj",
+  "title": "Aligned switches with Kelly counts up to 4 (Theorem BS4) are reconstructible",
+  "statement_en": "Theorem BS4 (aligned switch with Kelly counts up to 4, t1.md sections 3-5 of the diameter-2 no_triple_window directory): every graph G on at least 3 vertices such that for every set D of vertex pairs (a graph on the same vertices) that is switchable (each pair w y of D has y1, w1 outside {w, y} such that the degree of y1 in G − w is deg y − 1 + [w~y], the degree of w1 in G − y is deg w − 1 + [w~y], and G − w − y1 ≅ G − y − w1), degree-balanced (at every vertex v and degree k, D-pairs at v towards degree-k vertices split evenly into edges and non-edges of G), and keeps the induced counts of every graph on k ≤ 4 (k < n) vertices, G △ D is isomorphic to G; is reconstructible.",
+  "statement_lean": "Recon.ClassReconstructible (fun n G => ∀ D : SimpleGraph (Fin n), (∀ w y : Fin n, D.Adj w y → (∃ y₁ w₁ : Fin n, y₁ ≠ w ∧ y₁ ≠ y ∧ w₁ ≠ w ∧ w₁ ≠ y ∧ (G.Adj w y → (G.Adj w y₁ → (G.neighborSet y₁).ncard = (G.neighborSet y).ncard + 1) ∧ (¬ G.Adj w y₁ → (G.neighborSet y₁).ncard = (G.neighborSet y).ncard) ∧ (G.Adj y w₁ → (G.neighborSet w₁).ncard = (G.neighborSet w).ncard + 1) ∧ (¬ G.Adj y w₁ → (G.neighborSet w₁).ncard = (G.neighborSet w).ncard)) ∧ (¬ G.Adj w y → (G.Adj w y₁ → (G.neighborSet y₁).ncard = (G.neighborSet y).ncard) ∧ (¬ G.Adj w y₁ → (G.neighborSet y₁).ncard + 1 = (G.neighborSet y).ncard) ∧ (G.Adj y w₁ → (G.neighborSet w₁).ncard = (G.neighborSet w).ncard) ∧ (¬ G.Adj y w₁ → (G.neighborSet w₁).ncard + 1 = (G.neighborSet w).ncard)) ∧ Nonempty (G.induce ({w, y₁}ᶜ : Set (Fin n)) ≃g G.induce ({y, w₁}ᶜ : Set (Fin n))))) → (∀ v : Fin n, ∀ k : ℕ, {y : Fin n | D.Adj v y ∧ G.Adj v y ∧ (G.neighborSet y).ncard = k}.ncard = {y : Fin n | D.Adj v y ∧ ¬ G.Adj v y ∧ (G.neighborSet y).ncard = k}.ncard) → (∀ k : ℕ, k ≤ 4 → k < n → ∀ F : SimpleGraph (Fin k), {S : Finset (Fin n) | Nonempty ((symmDiff G D).induce (S : Set (Fin n)) ≃g F)}.ncard = {S : Finset (Fin n) | Nonempty (G.induce (S : Set (Fin n)) ≃g F)}.ncard) → Nonempty (G ≃g symmDiff G D))",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__aligned_switch_kelly4.lean",
+  "statement_sha256": "e0a5073071f03be22025577e2fee339cbf27e04067ae126a3299e6b30dad2d59",
+  "status": "checked",
+  "author": "round13",
+  "created": "2026-11-26T21:14:55+00:00",
+  "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__aligned_switch_kelly4_neg",
+  "dead_ends": [
+    {
+      "approach": "checked",
+      "reason": "other",
+      "by": "debe/round13-build",
+      "at": "2026-11-26T21:20:06+00:00"
+    }
+  ],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch__no_triple_window__aligned_switch_kelly4.lean",
+    "sha256": "fdef54827c0b30f82f508b49ed36e908870e3eb8828246f49013756b0ae6f205",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-26T21:20:03+00:00",
+    "by": "round13-build",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-26T21:14:55+00:00"
+}
