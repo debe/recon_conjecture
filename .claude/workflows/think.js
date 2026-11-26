@@ -11,6 +11,16 @@ export const meta = {
 const step = args && args.step
 if (!step) throw new Error('think: args.step is required')
 
+// Lease heartbeat: long phases outlive a 120-minute lease. When the caller holds the lease
+// (campaign passes args.holder), every long-running worker renews it while it works.
+const holder = args && args.holder
+const HB = holder
+  ? ` Lease heartbeat: holder ${holder} leases step ${step}. Run \`python3 tools/desk.py beat ${step} --holder ${holder} --minutes 120 --note "<what you are doing>"\` ` +
+    `when you start, and again whenever about 30 minutes have passed since your last beat (check \`date\`; beat between ` +
+    `compile iterations, test runs or sketch sections). If a beat fails because another holder has the lease, stop at once ` +
+    `and report that the lease was lost, with what you finished.`
+  : ''
+
 const ANGLES = (args.angles && args.angles.length) ? args.angles : [
   'DIRECT: unfold the definitions in lean/Recon/Basic.lean and find the shortest route that Mathlib already supports; favour explicit equivalences and finite counting that Lean can follow.',
   'STRUCTURAL: look for the classical argument in the literature (Kelly counting, induction on vertices or edges, decomposition into components or blocks) and an intermediate lemma that would make the step easy.',
@@ -46,7 +56,7 @@ const results = await pipeline(
     `Step ${step}. Write a paper sketch for it from this angle:\n${angle}\n\n` +
     `Write the sketch to notes/sketches/${step}/t${i + 1}.md. Start with ` +
     `\`python3 tools/desk.py status ${step}\` and respect its dead_ends. ` +
-    `Return the structured summary.`,
+    `Return the structured summary.` + HB,
     { label: `thinker:${step}:t${i + 1}`, phase: 'Sketch', agentType: 'thinker', schema: SKETCH }),
   (sk, _a, i) => {
     if (!sk || sk.verdict === 'stuck') return { sketch: sk, verdict: null }
@@ -56,7 +66,7 @@ const results = await pipeline(
       (sk.verdict === 'believe_false'
         ? 'The thinker believes the statement is FALSE. Try to confirm with a small-graph witness. Report refuted=true if the falsity argument is wrong. '
         : 'Find the first step that fails. ') +
-      'Mark it refuted only with a concrete flaw.',
+      'Mark it refuted only with a concrete flaw.' + HB,
       { label: `refuter:${step}:t${i + 1}`, phase: 'Refute', agentType: 'red-team', schema: VERDICT })
       .then(v => ({ sketch: sk, verdict: v }))
   },
