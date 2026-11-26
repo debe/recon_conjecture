@@ -7,15 +7,40 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card.lean",
   "statement_sha256": "11dc7c7c12c48bbcddb9645f0681d359c86cd10682257ed1ae79f1da5f4b07e7",
-  "status": "frozen",
+  "status": "reduced",
   "author": "round10",
   "created": "2026-11-25T23:56:21+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_asymmetric",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_symmetric",
+    "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__unique_switch"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card_r1.lean",
+      "children": [
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_asymmetric",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__pointed_pair_symmetric",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__unique_switch",
+        "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card__no_pointed_pair_no_switch"
+      ],
+      "status": "checked",
+      "sha256": "04f2a1090ac94e8d4670075437fc1e619f2376a6d6f05492a112f7cade6b3976",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-26T17:05:53+00:00",
+      "by": "round11"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure__no_half_pure_no_two_card_neg",
   "dead_ends": [],
   "sketches": [],

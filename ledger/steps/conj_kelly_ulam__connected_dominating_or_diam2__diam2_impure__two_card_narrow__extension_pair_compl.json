@@ -1,0 +1,38 @@
+{
+  "id": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_pair_compl",
+  "program": "conj",
+  "title": "Complement transfer: the low-vertex bound on re-attachment classes gives the bound at every vertex",
+  "statement_en": "Assume: for every normal-form counterexample (n >= 3, NF(d), G hypomorphic to H, G not isomorphic to H), every vertex u of degree d and any three members of C_G(u), two are equal. Then the same conclusion holds for every vertex u, without the degree condition (Zinchenko Thm 4.4 high case via the complement, Lemma 2.5: a high vertex of G is low in the complement, which is in NF(n - 2 - d) with the complementary counterexample partner, and C of the complement is the complement of C; debe_zinchenko.md B5).",
+  "statement_lean": "(∀ n : ℕ, 3 ≤ n → ∀ (d : ℕ) (G H : SimpleGraph (Fin n)), (∀ x : Fin n, (G.neighborSet x).ncard = d ∨ (G.neighborSet x).ncard = d + 1) → (∀ x y : Fin n, (G.neighborSet x).ncard = (G.neighborSet y).ncard → Nonempty (G.induce ({x}ᶜ : Set (Fin n)) ≃g G.induce ({y}ᶜ : Set (Fin n)))) → Recon.Hypomorphic G H → ¬ Nonempty (G ≃g H) → ∀ u : Fin n, (G.neighborSet u).ncard = d → ∀ K₁ K₂ K₃ : SimpleGraph (Fin n), Recon.Hypomorphic G K₁ → Recon.Hypomorphic G K₂ → Recon.Hypomorphic G K₃ → (∀ x y : Fin n, x ≠ u → y ≠ u → (G.Adj x y ↔ K₁.Adj x y)) → (∀ x y : Fin n, x ≠ u → y ≠ u → (G.Adj x y ↔ K₂.Adj x y)) → (∀ x y : Fin n, x ≠ u → y ≠ u → (G.Adj x y ↔ K₃.Adj x y)) → K₁ = K₂ ∨ K₁ = K₃ ∨ K₂ = K₃) → ∀ n : ℕ, 3 ≤ n → ∀ (d : ℕ) (G H : SimpleGraph (Fin n)), (∀ x : Fin n, (G.neighborSet x).ncard = d ∨ (G.neighborSet x).ncard = d + 1) → (∀ x y : Fin n, (G.neighborSet x).ncard = (G.neighborSet y).ncard → Nonempty (G.induce ({x}ᶜ : Set (Fin n)) ≃g G.induce ({y}ᶜ : Set (Fin n)))) → Recon.Hypomorphic G H → ¬ Nonempty (G ≃g H) → ∀ u : Fin n, ∀ K₁ K₂ K₃ : SimpleGraph (Fin n), Recon.Hypomorphic G K₁ → Recon.Hypomorphic G K₂ → Recon.Hypomorphic G K₃ → (∀ x y : Fin n, x ≠ u → y ≠ u → (G.Adj x y ↔ K₁.Adj x y)) → (∀ x y : Fin n, x ≠ u → y ≠ u → (G.Adj x y ↔ K₂.Adj x y)) → (∀ x y : Fin n, x ≠ u → y ≠ u → (G.Adj x y ↔ K₃.Adj x y)) → K₁ = K₂ ∨ K₁ = K₃ ∨ K₂ = K₃",
+  "statement_imports": [],
+  "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_pair_compl.lean",
+  "statement_sha256": "c4716b5842e0fbf93d396f494dbea8bf7ad4e7ab2d46d2ae79d198af8a7dedaa",
+  "status": "checked",
+  "author": "reducer",
+  "created": "2026-11-26T15:41:31+00:00",
+  "parent": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow",
+  "is_root": false,
+  "human_approved": false,
+  "fidelity": [],
+  "children": [],
+  "reductions": [],
+  "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_pair_compl_neg",
+  "dead_ends": [],
+  "sketches": [],
+  "checked": {
+    "file": "lean/Recon/Checked/L_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_pair_compl.lean",
+    "sha256": "be77afdb4f6bc77feceb27bc57b941c4ba5ded8d92a1f6ba0635452a69f1c6ff",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "at": "2026-11-26T15:46:08+00:00",
+    "by": "b1",
+    "toolchain": "leanprover/lean4:v4.36.0",
+    "mathlib_rev": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842"
+  },
+  "refuted": null,
+  "priority": 50,
+  "frozen_at": "2026-11-26T15:41:31+00:00"
+}

@@ -7,15 +7,40 @@
   "statement_imports": [],
   "statement_file": "lean/Recon/Statements/S_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow.lean",
   "statement_sha256": "60d791e621e4f9c96a0b4dbe97e3b498a4dd9a11ba1be086a10eb2314d1a3cb4",
-  "status": "frozen",
+  "status": "reduced",
   "author": "round10",
   "created": "2026-11-25T23:55:53+00:00",
   "parent": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure",
   "is_root": false,
   "human_approved": false,
   "fidelity": [],
-  "children": [],
-  "reductions": [],
+  "children": [
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_eigen",
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_pair_compl",
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__low_extension_pair",
+    "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__three_extensions"
+  ],
+  "reductions": [
+    {
+      "name": "R_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow_r1",
+      "file": "lean/Recon/Checked/R_conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow_r1.lean",
+      "children": [
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_eigen",
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__low_extension_pair",
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__extension_pair_compl",
+        "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow__three_extensions"
+      ],
+      "status": "checked",
+      "sha256": "b73f95a32ae844b8611aaee933aed61f0d9f9b81c5714d6d43b50d581f3b51b5",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "at": "2026-11-26T15:41:31+00:00",
+      "by": "reducer"
+    }
+  ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__diam2_impure__two_card_narrow_neg",
   "dead_ends": [],
   "sketches": [],
