@@ -41,7 +41,14 @@
   ],
   "negated_twin": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure_neg",
   "dead_ends": [],
-  "sketches": [],
+  "sketches": [
+    {
+      "path": "notes/sketches/conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure/alt_triangle.md",
+      "by": "reducer",
+      "at": "2026-11-28T07:40:12+00:00",
+      "survived_refutation": false
+    }
+  ],
   "checked": null,
   "refuted": null,
   "priority": 50,

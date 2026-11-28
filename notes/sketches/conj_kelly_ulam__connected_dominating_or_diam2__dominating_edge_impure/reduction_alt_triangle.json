@@ -1,0 +1,19 @@
+{
+ "parent": "conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure",
+ "by": "reducer",
+ "proof_file": "lean/Recon/Scratch/conj_kelly_ulam__connected_dominating_or_diam2__dominating_edge_impure/reduction.lean",
+ "children": [
+  {
+   "slug": "triangle_free_dominating_edge",
+   "title": "Residual with a dominating edge in no triangle",
+   "statement_en": "Every graph G on at least 3 vertices in the parent residual class (G and its complement connected, a dominating edge, no pure degree class, no unique-copy factorizing pair) that moreover has a dominating edge uv with no common neighbour (so V = {u,v} plus the disjoint sets N(u)-v and N(v)-u) is reconstructible.",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => (G.Connected ∧ Gᶜ.Connected ∧ (∃ u v : Fin n, G.Adj u v ∧ ∀ x : Fin n, x = u ∨ x = v ∨ G.Adj x u ∨ G.Adj x v) ∧ ¬ (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')) ∧ ¬ (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1))) ∧ (∃ u v : Fin n, G.Adj u v ∧ (∀ x : Fin n, x = u ∨ x = v ∨ G.Adj x u ∨ G.Adj x v) ∧ ∀ x : Fin n, ¬ (G.Adj x u ∧ G.Adj x v)))"
+  },
+  {
+   "slug": "dominating_edges_in_triangles",
+   "title": "Residual where every dominating edge lies in a triangle",
+   "statement_en": "Every graph G on at least 3 vertices in the parent residual class (G and its complement connected, a dominating edge, no pure degree class, no unique-copy factorizing pair) in which every dominating edge uv has a common neighbour is reconstructible.",
+   "statement_lean": "Recon.ClassReconstructible (fun n G => (G.Connected ∧ Gᶜ.Connected ∧ (∃ u v : Fin n, G.Adj u v ∧ ∀ x : Fin n, x = u ∨ x = v ∨ G.Adj x u ∨ G.Adj x v) ∧ ¬ (∃ u : Fin n, ∀ x y x' y' : Fin n, (G.neighborSet x).ncard = (G.neighborSet u).ncard → (G.neighborSet x').ncard = (G.neighborSet u).ncard → x ≠ y → x' ≠ y' → Nonempty (G.induce ({x, y}ᶜ : Set (Fin n)) ≃g G.induce ({x', y'}ᶜ : Set (Fin n))) → (G.Adj x y ↔ G.Adj x' y')) ∧ ¬ (∃ u v : Fin n, u ≠ v ∧ (∀ T : Finset (Fin n), Nonempty (G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce (T : Set (Fin n))) → (T : Set (Fin n)) = {u, v}ᶜ) ∧ ∀ g : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), ∃ h : G.induce ({u, v}ᶜ : Set (Fin n)) ≃g G.induce ({u, v}ᶜ : Set (Fin n)), (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj v (h x).1 ↔ G.Adj v x.1) ∧ (∀ x : ({u, v}ᶜ : Set (Fin n)), G.Adj u (g (h x)).1 ↔ G.Adj u x.1))) ∧ ¬ (∃ u v : Fin n, G.Adj u v ∧ (∀ x : Fin n, x = u ∨ x = v ∨ G.Adj x u ∨ G.Adj x v) ∧ ∀ x : Fin n, ¬ (G.Adj x u ∧ G.Adj x v)))"
+  }
+ ]
+}
